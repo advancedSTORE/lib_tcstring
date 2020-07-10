@@ -1,0 +1,18 @@
+[package]
+name = "iab_tcstring"
+version = "0.1.0"
+authors = ["Joerg Jennerjahn <joerg.jennerjahn@advanced-store.com>", "Friedemann Sommer <friedemann.sommer@advanced-store.com>"]
+edition = "2018"
+description = "IAB TCF (v1, v2) TCString utilities"
+homepage = "https://github.com/advancedSTORE/iab_tcstring"
+repository = "https://github.com/advancedSTORE/iab_tcstring"
+license-file = "LICENSE"
+keywords = ["iab", "tcf", "tcstring", "decode"]
+categories = ["parsing"]
+exclude = [".github/**", "Cargo.lock"]
+
+[build-dependencies]
+clippy = { version = "*", optional = true }
+
+[dependencies]
+base64 = "0.12.3"
