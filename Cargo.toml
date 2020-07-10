@@ -9,7 +9,7 @@ repository = "https://github.com/advancedSTORE/iab_tcstring"
 license-file = "LICENSE"
 keywords = ["iab", "tcf", "tcstring", "decode"]
 categories = ["parsing"]
-exclude = [".github/**", "Cargo.lock", "target/**"]
+exclude = [".github/**", "Cargo.lock"]
 
 [build-dependencies]
 clippy = { version = "*", optional = true }
