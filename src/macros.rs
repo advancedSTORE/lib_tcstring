@@ -30,3 +30,24 @@ macro_rules! range_section_value {
         }
     }};
 }
+
+#[macro_export]
+macro_rules! parse_bitfield_from_bytes {
+    ($name: ident, $type: tt) => {
+        pub(crate) fn $name(
+            val: &[u8],
+            bit_start: usize,
+            bit_length: usize,
+        ) -> Result<Vec<$type>, crate::decode::model::TCSDecodeError> {
+            let bit_end = bit_start + bit_length;
+            byte_list_bit_boundary_check!(val, bit_end - 1);
+            let mut result: Vec<$type> = Vec::with_capacity(bit_length);
+            for bit_index in bit_start..bit_end {
+                if parse_from_bytes(val, bit_index, 1) == 1 {
+                    result.push(((bit_index - bit_start) + 1) as $type);
+                }
+            }
+            Ok(result)
+        }
+    };
+}

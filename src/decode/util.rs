@@ -11,13 +11,13 @@ pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length
     let last_byte_index = absolute_end_bit / 8;
     let remaining_bits_in_first_byte =
         (7i64 - (first_byte_start_bit as i64 + (relative_end_bit as i64))).max(0) as u8;
-    let mut bit_mask = 0xff << first_byte_start_bit & 0xff;
+    let mut bit_mask: u64 = 0xff << first_byte_start_bit & 0xff;
     let mut current_byte = absolute_start_bit / 8;
 
     bit_mask >>= first_byte_start_bit + remaining_bits_in_first_byte;
     bit_mask <<= remaining_bits_in_first_byte;
 
-    let mut return_value = val[current_byte] as u64 & (bit_mask) as u64;
+    let mut return_value = val[current_byte] as u64 & bit_mask;
 
     return_value >>= remaining_bits_in_first_byte as u64;
 
@@ -35,7 +35,7 @@ pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length
 
     return_value <<= (last_byte_end_bit + 1) as u64;
     let bit_shift = 7 - last_byte_end_bit as u64;
-    return_value + ((val[current_byte] as u64 & 0xff << bit_shift) >> bit_shift)
+    return_value + ((val[current_byte] as u64 & (0xff << bit_shift)) >> bit_shift)
 }
 
 pub(crate) fn parse_string_from_bytes(
@@ -58,47 +58,6 @@ pub(crate) fn parse_string_from_bytes(
 
         result.push((b'A' + alphabet_offset) as char);
         offset += bit_width;
-    }
-
-    Ok(result)
-}
-
-pub(crate) fn parse_u8_bitfield_from_bytes(
-    val: &[u8],
-    bit_start: usize,
-    bit_length: usize,
-) -> Result<Vec<u8>, TCSDecodeError> {
-    byte_list_bit_boundary_check!(val, bit_start + bit_length - 1);
-
-    let mut result: Vec<u8> = Vec::with_capacity(bit_length);
-
-    for index in 0..bit_length {
-        if parse_from_bytes(val, bit_start + index, 1) as u8 == 1 {
-            result.push(index as u8 + 1);
-        }
-    }
-
-    Ok(result)
-}
-
-pub(crate) fn parse_u16_bitfield_from_bytes(
-    val: &[u8],
-    bit_start: usize,
-    bit_length: usize,
-) -> Result<Vec<u16>, TCSDecodeError> {
-    let bit_end = bit_start + bit_length;
-
-    byte_list_bit_boundary_check!(val, bit_end - 1);
-
-    let mut result: Vec<u16> = Vec::with_capacity(bit_length);
-    let mut index = bit_start;
-
-    while index < bit_end {
-        if parse_from_bytes(val, index, 1) as u8 == 1 {
-            result.push((index - bit_start + 1) as u16);
-        }
-
-        index += 1;
     }
 
     Ok(result)
@@ -143,3 +102,6 @@ pub(crate) fn parse_vendor_range_from_bytes(
         value: RangeSectionType::Vendor(entry_list),
     })
 }
+
+parse_bitfield_from_bytes!(parse_u8_bitfield_from_bytes, u8);
+parse_bitfield_from_bytes!(parse_u16_bitfield_from_bytes, u16);

@@ -75,7 +75,6 @@ pub struct PublisherRestriction {
 pub type TCSDecodeError = &'static str;
 
 #[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq)]
 pub(crate) enum RangeSectionType {
     Vendor(Vec<u16>),
     VendorLegitimateInterest(Vec<u16>),
@@ -96,7 +95,6 @@ pub(crate) struct RangeSection {
 }
 
 #[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq, PartialOrd)]
 pub(crate) struct PublisherTC {
     pub publisher_purposes_consent: Vec<u8>,
     pub publisher_purposes_li_transparency: Vec<u8>,

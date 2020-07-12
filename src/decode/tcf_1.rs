@@ -1,10 +1,9 @@
-use crate::decode::util::parse_vendor_range_from_bytes;
 use crate::decode::{
     error::{INVALID_SECTION_DEFINTION, INVALID_URL_SAFE_BASE64, UNSUPPORTED_VERSION},
     model::{RangeSectionType, TCModelV1, TCSDecodeError, VendorSet},
     util::{
         parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
-        parse_u8_bitfield_from_bytes,
+        parse_u8_bitfield_from_bytes, parse_vendor_range_from_bytes,
     },
 };
 use std::convert::TryFrom;
