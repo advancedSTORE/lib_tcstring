@@ -7,19 +7,17 @@ pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length
     let first_byte_start_bit = (absolute_start_bit % 8) as u8;
     let relative_end_bit = bit_length - 1;
     let absolute_end_bit = absolute_start_bit + relative_end_bit;
-    let last_byte_end_bit = (absolute_end_bit % 8) as u8;
+    let last_byte_end_bit = (absolute_end_bit % 8) as u64;
     let last_byte_index = absolute_end_bit / 8;
     let remaining_bits_in_first_byte =
         (7i64 - (first_byte_start_bit as i64 + (relative_end_bit as i64))).max(0) as u8;
-    let mut bit_mask: u64 = 0xff << first_byte_start_bit & 0xff;
+    let mut bit_mask: u64 = (0xff << first_byte_start_bit) & 0xff;
     let mut current_byte = absolute_start_bit / 8;
 
-    bit_mask >>= first_byte_start_bit + remaining_bits_in_first_byte;
-    bit_mask <<= remaining_bits_in_first_byte;
+    bit_mask = (bit_mask >> (first_byte_start_bit + remaining_bits_in_first_byte))
+        << remaining_bits_in_first_byte;
 
-    let mut return_value = val[current_byte] as u64 & bit_mask;
-
-    return_value >>= remaining_bits_in_first_byte as u64;
+    let mut return_value = (val[current_byte] as u64 & bit_mask) >> remaining_bits_in_first_byte;
 
     if current_byte >= last_byte_index {
         return return_value;
@@ -28,14 +26,14 @@ pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length
     current_byte += 1;
 
     while current_byte < last_byte_index {
-        return_value <<= 8;
-        return_value += val[current_byte] as u64;
+        return_value = (return_value << 8) | (val[current_byte] as u64);
         current_byte += 1;
     }
 
-    return_value <<= (last_byte_end_bit + 1) as u64;
-    let bit_shift = 7 - last_byte_end_bit as u64;
-    return_value + ((val[current_byte] as u64 & (0xff << bit_shift)) >> bit_shift)
+    let bit_shift = 7 - last_byte_end_bit;
+
+    (return_value << (last_byte_end_bit + 1))
+        | ((val[current_byte] as u64 & (0xff << bit_shift)) >> bit_shift)
 }
 
 pub(crate) fn parse_string_from_bytes(
