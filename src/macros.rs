@@ -1,3 +1,4 @@
+#[doc(hidden)]
 #[macro_export]
 macro_rules! byte_list_bit_boundary_check {
     ($byte_list: expr, $bit_index: expr) => {{
@@ -10,6 +11,7 @@ macro_rules! byte_list_bit_boundary_check {
     }};
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! range_section_value {
     ($sections: expr, $variant: path) => {{
@@ -31,6 +33,7 @@ macro_rules! range_section_value {
     }};
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! parse_bitfield_from_bytes {
     ($name: ident, $type: tt) => {
