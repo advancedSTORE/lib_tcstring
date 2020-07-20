@@ -100,10 +100,7 @@ fn parse_range_sections_from_bytes(
     Ok(sections)
 }
 
-fn parse_vendor_segment_from_bytes(
-    val: &[u8],
-    bit_start: usize,
-) -> Result<Vec<u16>, TcsError> {
+fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u16>, TcsError> {
     let max_vendor_id = parse_from_bytes(val, bit_start, 16) as usize;
 
     Ok(if parse_from_bytes(val, bit_start + 16, 1) == 0 {
@@ -117,10 +114,7 @@ fn parse_vendor_segment_from_bytes(
     })
 }
 
-fn parse_publisher_tc_from_bytes(
-    val: &[u8],
-    bit_start: usize,
-) -> Result<PublisherTC, TcsError> {
+fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<PublisherTC, TcsError> {
     let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6) as usize;
 
     Ok(PublisherTC {
