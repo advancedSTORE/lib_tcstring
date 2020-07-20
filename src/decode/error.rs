@@ -1,7 +1,8 @@
-use std::fmt::{Display, Formatter};
-use std::error::Error;
-use core::fmt;
 use base64::DecodeError;
+use std::{
+    error::Error,
+    fmt::{Display, Formatter},
+};
 
 pub const INSUFFICIENT_LENGTH: &str = "ERR_INSUFFICIENT_LENGTH";
 pub const UNSUPPORTED_VERSION: &str = "ERR_UNSUPPORTED_VERSION";
@@ -13,7 +14,6 @@ pub const UNEXPECTED_RANGE_SECTION: &str = "ERR_UNEXPECTED_RANGE_SECTION";
 
 #[derive(Debug, PartialEq)]
 pub enum TcfError {
-
     InsufficientLength,
     UnsupportedVersion,
     InvalidUrlSafeBase64(DecodeError),
@@ -21,15 +21,16 @@ pub enum TcfError {
     InvalidSectionDefinition,
     InvalidSegmentDefinition,
     UnexpectedRangeSection,
-
 }
 
 impl Display for TcfError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             TcfError::InsufficientLength => write!(f, "{}", INSUFFICIENT_LENGTH),
             TcfError::UnsupportedVersion => write!(f, "{}", UNSUPPORTED_VERSION),
-            TcfError::InvalidUrlSafeBase64(_) => write!(f, "{}", INVALID_URL_SAFE_BASE64),
+            TcfError::InvalidUrlSafeBase64(decode_error) => {
+                write!(f, "{}: {}", INVALID_URL_SAFE_BASE64, decode_error)
+            }
             TcfError::InvalidAlphabetOffset => write!(f, "{}", INVALID_ALPHABET_OFFSET),
             TcfError::InvalidSectionDefinition => write!(f, "{}", INVALID_SECTION_DEFINITION),
             TcfError::InvalidSegmentDefinition => write!(f, "{}", INVALID_SEGMENT_DEFINITION),
@@ -42,7 +43,7 @@ impl Error for TcfError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             TcfError::InvalidUrlSafeBase64(err) => Some(err),
-            _ => None
+            _ => None,
         }
     }
 }
