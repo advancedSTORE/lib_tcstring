@@ -11,8 +11,12 @@ keywords = ["iab", "tcf", "tcstring", "decode"]
 categories = ["parsing"]
 exclude = [".github/**", "Cargo.lock"]
 
+[features]
+default = []
+
 [build-dependencies]
-clippy = { version = "*", optional = true }
+clippy = "0.0.302"
 
 [dependencies]
-base64 = "0.12.3"
+base64 = "0.12"
+serde = { version = "1.0", features = ["derive"], optional = true }

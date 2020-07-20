@@ -1,12 +1,11 @@
-#[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, PartialOrd, Hash, Debug)]
 pub enum TCModel {
     V1(Box<TCModelV1>),
     V2(Box<TCModelV2>),
 }
 
-#[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(PartialEq, Clone, PartialOrd, Hash, Debug)]
 pub enum PublisherRestrictionType {
     NotAllowed,
     RequireConsent,
@@ -14,15 +13,15 @@ pub enum PublisherRestrictionType {
     Undefined,
 }
 
-#[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct VendorSet {
     pub is_blocklist: bool,
     pub list: Vec<u16>,
 }
 
-#[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct TCModelV1 {
     pub created_at: u64,
     pub updated_at: u64,
@@ -35,8 +34,8 @@ pub struct TCModelV1 {
     pub vendors: VendorSet,
 }
 
-#[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct TCModelV2 {
     pub created_at: u64,
     pub updated_at: u64,
@@ -64,8 +63,8 @@ pub struct TCModelV2 {
     pub custom_purposes_li_transparency: Vec<u8>,
 }
 
-#[cfg_attr(test, derive(Debug))]
-#[derive(PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct PublisherRestriction {
     pub purpose_id: u8,
     pub restriction_type: PublisherRestrictionType,
@@ -110,5 +109,39 @@ impl Default for PublisherTC {
             publisher_purposes_consent: vec![],
             publisher_purposes_li_transparency: vec![],
         }
+    }
+}
+
+impl Default for PublisherRestrictionType {
+    fn default() -> Self {
+        Self::Undefined
+    }
+}
+
+impl VendorSet {
+    #[allow(dead_code)]
+    fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl TCModelV1 {
+    #[allow(dead_code)]
+    fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl TCModelV2 {
+    #[allow(dead_code)]
+    fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl PublisherRestriction {
+    #[allow(dead_code)]
+    fn new() -> Self {
+        Self::default()
     }
 }
