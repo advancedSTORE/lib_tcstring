@@ -32,7 +32,7 @@ pub use decode::model::{
     PublisherRestriction, PublisherRestrictionType, TCModel, TCModelV1, TCModelV2, VendorSet,
 };
 
-pub use decode::error::TcfError;
+pub use decode::error::TcsError;
 
 mod tests {
     #[test]

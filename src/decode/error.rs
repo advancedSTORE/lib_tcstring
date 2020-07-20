@@ -1,11 +1,9 @@
-use std::fmt::{Display, Formatter};
-use std::error::Error;
-use std::fmt;
-use base64::DecodeError;
 use std::{
     error::Error,
     fmt::{Display, Formatter},
 };
+
+use base64::DecodeError;
 
 pub const INSUFFICIENT_LENGTH: &str = "ERR_INSUFFICIENT_LENGTH";
 pub const UNSUPPORTED_VERSION: &str = "ERR_UNSUPPORTED_VERSION";
