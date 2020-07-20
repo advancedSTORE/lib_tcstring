@@ -12,14 +12,22 @@ pub const INVALID_SECTION_DEFINITION: &str = "ERR_INVALID_SECTION_DEFINITION";
 pub const INVALID_SEGMENT_DEFINITION: &str = "ERR_INVALID_SEGMENT_DEFINITION";
 pub const UNEXPECTED_RANGE_SECTION: &str = "ERR_UNEXPECTED_RANGE_SECTION";
 
-#[derive(Debug, PartialEq)]
+/// Errors that can occur while decoding the TCString
+#[derive(Clone, Debug, PartialEq)]
 pub enum TcsError {
+    /// TCString doesn't have enough bits
     InsufficientLength,
+    /// TCString contains an invalid or unsupported version
     UnsupportedVersion,
+    /// TCString doesn't contain valid base64
     InvalidUrlSafeBase64(DecodeError),
+    /// TCString contains an invalid offset for string creation
     InvalidAlphabetOffset,
+    /// TCString contains an invalid section definition
     InvalidSectionDefinition,
+    /// TCString contains an invalid segment definition
     InvalidSegmentDefinition,
+    /// TCString contains an unkown range section definition
     UnexpectedRangeSection,
 }
 
