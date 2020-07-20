@@ -2,6 +2,7 @@
 /// without checking the version on the calling side
 ///
 /// ```edition2018
+/// use std::convert::TryFrom;
 /// // will return a Result which contains the variant for the TCString version or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
 /// let tc_model = iab_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
@@ -69,6 +70,7 @@ pub struct VendorSet {
 /// * `VendorConsents` -> [`vendors`]
 ///
 /// ```edition2018
+/// use std::convert::TryFrom;
 /// // will return a Result which contains either the TCModel or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
 /// let tc_model = iab_tcstring::TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
@@ -149,6 +151,7 @@ pub struct TCModelV1 {
 /// * `CustomPurposesLITransparency` -> [`custom_purposes_li_transparency`]
 ///
 /// ```edition2018
+/// use std::convert::TryFrom;
 /// // will return a Result which contains either the TCModel or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
 /// let tc_model = iab_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");

@@ -4,6 +4,7 @@
 //!
 //! General usage
 //! ```edition2018
+//! use std::convert::TryFrom;
 //! // will return an Result which contains an TCModel V2
 //! let tc_model_v2 = iab_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 //! // will return an Result which contains an TCModel V1
@@ -12,6 +13,7 @@
 //!
 //! If it's possible to know which TCModel version is used you can instead write it like this:
 //! ```edition2018
+//! use std::convert::TryFrom;
 //! let tc_model_v2 = iab_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 //! let tc_model_v1 = iab_tcstring::TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
 //! ```
