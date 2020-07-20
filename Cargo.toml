@@ -10,12 +10,16 @@ license-file = "LICENSE"
 keywords = ["iab", "tcf", "tcstring", "decode"]
 categories = ["parsing"]
 exclude = [".github/**", "Cargo.lock"]
+documentation = "https://docs.rs/iab_tcstring/"
 
 [features]
 default = []
 
 [build-dependencies]
 clippy = "0.0.302"
+
+[dev-dependencies]
+version-sync = "0.9"
 
 [dependencies]
 base64 = "0.12"

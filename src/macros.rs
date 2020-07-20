@@ -18,7 +18,7 @@ macro_rules! range_section_value {
         let sections = &mut $sections;
 
         if sections.is_empty() {
-            return Err(crate::decode::error::INVALID_SECTION_DEFINTION);
+            return Err(crate::decode::error::INVALID_SECTION_DEFINITION);
         }
 
         if let RangeSection {
@@ -28,7 +28,7 @@ macro_rules! range_section_value {
         {
             section
         } else {
-            return Err(crate::decode::error::INVALID_SECTION_DEFINTION);
+            return Err(crate::decode::error::INVALID_SECTION_DEFINITION);
         }
     }};
 }
@@ -43,13 +43,17 @@ macro_rules! parse_bitfield_from_bytes {
             bit_length: usize,
         ) -> Result<Vec<$type>, crate::decode::model::TCSDecodeError> {
             let bit_end = bit_start + bit_length;
+
             byte_list_bit_boundary_check!(val, bit_end - 1);
+
             let mut result: Vec<$type> = Vec::with_capacity(bit_length);
+
             for bit_index in bit_start..bit_end {
                 if parse_from_bytes(val, bit_index, 1) == 1 {
                     result.push(((bit_index - bit_start) + 1) as $type);
                 }
             }
+
             Ok(result)
         }
     };
