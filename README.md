@@ -1,6 +1,6 @@
 ![CI](https://github.com/advancedSTORE/lib_tcstring/workflows/CI/badge.svg)
 
-# IAB TCF string library
+# IAB TCString library
 A utility library to work with the IAB TCF v1 & v2 strings.
 
 **NOTE**: currently only TCString decoding is implemented
