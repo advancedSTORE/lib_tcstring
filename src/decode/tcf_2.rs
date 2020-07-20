@@ -157,7 +157,7 @@ fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TCSegment, TcsError> 
                     Some(parse_vendor_segment_from_bytes(segment_bytes, 3)?)
             }
             3 => tc_segment.publisher_tc = Some(parse_publisher_tc_from_bytes(segment_bytes, 3)?),
-            _ => return Err(TcsError::InvalidSectionDefinition),
+            _ => return Err(TcsError::InvalidSegmentDefinition),
         };
     }
 
