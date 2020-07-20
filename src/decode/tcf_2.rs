@@ -1,11 +1,8 @@
 use crate::decode::{
-    error::{
-        INSUFFICIENT_LENGTH, INVALID_SECTION_DEFINITION, INVALID_SEGMENT_DEFINITION,
-        INVALID_URL_SAFE_BASE64, UNEXPECTED_RANGE_SECTION, UNSUPPORTED_VERSION,
-    },
+    error::TcfError,
     model::{
         PublisherRestriction, PublisherRestrictionType, PublisherTC, RangeSection,
-        RangeSectionType, TCModelV2, TCSDecodeError, TCSegment,
+        RangeSectionType, TCModelV2, TCSegment,
     },
     util::{
         parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
@@ -17,7 +14,7 @@ use std::convert::TryFrom;
 fn parse_publisher_restrictions_from_bytes(
     val: &[u8],
     bit_start: usize,
-) -> Result<RangeSection, TCSDecodeError> {
+) -> Result<RangeSection, TcfError> {
     byte_list_bit_boundary_check!(val, bit_start + 11);
 
     let restriction_count = parse_from_bytes(val, bit_start, 12) as usize;
@@ -46,7 +43,7 @@ fn parse_publisher_restrictions_from_bytes(
             vendor_list: if let RangeSectionType::Vendor(vendor_set) = section.value {
                 vendor_set
             } else {
-                return Err(INVALID_SECTION_DEFINITION);
+                return Err(TcfError::InvalidSectionDefinition);
             },
         });
 
@@ -62,7 +59,7 @@ fn parse_publisher_restrictions_from_bytes(
 fn parse_range_sections_from_bytes(
     val: &[u8],
     bit_start: usize,
-) -> Result<Vec<RangeSection>, TCSDecodeError> {
+) -> Result<Vec<RangeSection>, TcfError> {
     let max_bit_length = val.len() * 8;
     let mut sections: Vec<RangeSection> = Vec::with_capacity(3);
     let mut start = bit_start;
@@ -106,7 +103,7 @@ fn parse_range_sections_from_bytes(
 fn parse_vendor_segment_from_bytes(
     val: &[u8],
     bit_start: usize,
-) -> Result<Vec<u16>, TCSDecodeError> {
+) -> Result<Vec<u16>, TcfError> {
     let max_vendor_id = parse_from_bytes(val, bit_start, 16) as usize;
 
     Ok(if parse_from_bytes(val, bit_start + 16, 1) == 0 {
@@ -116,14 +113,14 @@ fn parse_vendor_segment_from_bytes(
     {
         vendor_set
     } else {
-        return Err(UNEXPECTED_RANGE_SECTION);
+        return Err(TcfError::UnexpectedRangeSection);
     })
 }
 
 fn parse_publisher_tc_from_bytes(
     val: &[u8],
     bit_start: usize,
-) -> Result<PublisherTC, TCSDecodeError> {
+) -> Result<PublisherTC, TcfError> {
     let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6) as usize;
 
     Ok(PublisherTC {
@@ -146,7 +143,7 @@ fn parse_publisher_tc_from_bytes(
     })
 }
 
-fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TCSegment, TCSDecodeError> {
+fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TCSegment, TcfError> {
     let mut tc_segment = TCSegment {
         disclosed_vendors: None,
         allowed_vendors: None,
@@ -166,7 +163,7 @@ fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TCSegment, TCSDecodeE
                     Some(parse_vendor_segment_from_bytes(segment_bytes, 3)?)
             }
             3 => tc_segment.publisher_tc = Some(parse_publisher_tc_from_bytes(segment_bytes, 3)?),
-            _ => return Err(INVALID_SEGMENT_DEFINITION),
+            _ => return Err(TcfError::InvalidSectionDefinition),
         };
     }
 
@@ -174,24 +171,24 @@ fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TCSegment, TCSDecodeE
 }
 
 impl TryFrom<&str> for TCModelV2 {
-    type Error = TCSDecodeError;
+    type Error = TcfError;
 
     fn try_from(val: &str) -> Result<Self, Self::Error> {
         if !val.starts_with('C') {
-            return Err(UNSUPPORTED_VERSION);
+            return Err(TcfError::UnsupportedVersion);
         }
 
         let mut tcs_segments: Vec<Vec<u8>> = Vec::with_capacity(4);
 
         for base64_str in val.split('.') {
             if base64_str.is_empty() {
-                return Err(INSUFFICIENT_LENGTH);
+                return Err(TcfError::InsufficientLength);
             }
 
             tcs_segments.push(
                 match base64::decode_config(base64_str, base64::URL_SAFE_NO_PAD) {
                     Ok(decoded_bytes) => decoded_bytes,
-                    Err(_) => return Err(INVALID_URL_SAFE_BASE64),
+                    Err(err) => return Err(TcfError::InvalidUrlSafeBase64(err)),
                 },
             );
         }
@@ -201,7 +198,7 @@ impl TryFrom<&str> for TCModelV2 {
 }
 
 impl TCModelV2 {
-    fn try_from_vec(val: Vec<Vec<u8>>) -> Result<Self, TCSDecodeError> {
+    fn try_from_vec(val: Vec<Vec<u8>>) -> Result<Self, TcfError> {
         let core_segment = val[0].as_slice();
 
         byte_list_bit_boundary_check!(core_segment, 213);

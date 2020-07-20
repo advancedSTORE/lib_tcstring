@@ -7,18 +7,18 @@ pub mod tcf_2;
 pub(crate) mod util;
 
 use crate::decode::{
-    error::UNSUPPORTED_VERSION,
-    model::{TCModel, TCModelV1, TCModelV2, TCSDecodeError},
+    error::TcfError,
+    model::{TCModel, TCModelV1, TCModelV2},
 };
 
 impl TryFrom<&str> for TCModel {
-    type Error = TCSDecodeError;
+    type Error = TcfError;
 
     fn try_from(val: &str) -> Result<TCModel, Self::Error> {
         Ok(match val.chars().next() {
             Some('B') => TCModel::V1(Box::new(TCModelV1::try_from(val)?)),
             Some('C') => TCModel::V2(Box::new(TCModelV2::try_from(val)?)),
-            _ => return Err(UNSUPPORTED_VERSION),
+            _ => return Err(TcfError::UnsupportedVersion),
         })
     }
 }

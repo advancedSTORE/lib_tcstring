@@ -263,8 +263,6 @@ pub struct PublisherRestriction {
     pub vendor_list: Vec<u16>,
 }
 
-pub type TCSDecodeError = &'static str;
-
 #[cfg_attr(test, derive(Debug))]
 pub(crate) enum RangeSectionType {
     Vendor(Vec<u16>),

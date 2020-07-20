@@ -29,8 +29,7 @@ mod macros;
 mod decode;
 
 pub use decode::model::{
-    PublisherRestriction, PublisherRestrictionType, TCModel, TCModelV1, TCModelV2, TCSDecodeError,
-    VendorSet,
+    PublisherRestriction, PublisherRestrictionType, TCModel, TCModelV1, TCModelV2, VendorSet,
 };
 
 mod tests {
