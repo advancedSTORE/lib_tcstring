@@ -1,3 +1,6 @@
+use std::fmt::{Display, Formatter};
+use std::error::Error;
+use std::fmt;
 use base64::DecodeError;
 use std::{
     error::Error,
@@ -13,7 +16,7 @@ pub const INVALID_SEGMENT_DEFINITION: &str = "ERR_INVALID_SEGMENT_DEFINITION";
 pub const UNEXPECTED_RANGE_SECTION: &str = "ERR_UNEXPECTED_RANGE_SECTION";
 
 #[derive(Debug, PartialEq)]
-pub enum TcfError {
+pub enum TcsError {
     InsufficientLength,
     UnsupportedVersion,
     InvalidUrlSafeBase64(DecodeError),
@@ -23,26 +26,26 @@ pub enum TcfError {
     UnexpectedRangeSection,
 }
 
-impl Display for TcfError {
+impl Display for TcsError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            TcfError::InsufficientLength => write!(f, "{}", INSUFFICIENT_LENGTH),
-            TcfError::UnsupportedVersion => write!(f, "{}", UNSUPPORTED_VERSION),
-            TcfError::InvalidUrlSafeBase64(decode_error) => {
+            TcsError::InsufficientLength => write!(f, "{}", INSUFFICIENT_LENGTH),
+            TcsError::UnsupportedVersion => write!(f, "{}", UNSUPPORTED_VERSION),
+            TcsError::InvalidUrlSafeBase64(decode_error) => {
                 write!(f, "{}: {}", INVALID_URL_SAFE_BASE64, decode_error)
             }
-            TcfError::InvalidAlphabetOffset => write!(f, "{}", INVALID_ALPHABET_OFFSET),
-            TcfError::InvalidSectionDefinition => write!(f, "{}", INVALID_SECTION_DEFINITION),
-            TcfError::InvalidSegmentDefinition => write!(f, "{}", INVALID_SEGMENT_DEFINITION),
-            TcfError::UnexpectedRangeSection => write!(f, "{}", UNEXPECTED_RANGE_SECTION),
+            TcsError::InvalidAlphabetOffset => write!(f, "{}", INVALID_ALPHABET_OFFSET),
+            TcsError::InvalidSectionDefinition => write!(f, "{}", INVALID_SECTION_DEFINITION),
+            TcsError::InvalidSegmentDefinition => write!(f, "{}", INVALID_SEGMENT_DEFINITION),
+            TcsError::UnexpectedRangeSection => write!(f, "{}", UNEXPECTED_RANGE_SECTION),
         }
     }
 }
 
-impl Error for TcfError {
+impl Error for TcsError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            TcfError::InvalidUrlSafeBase64(err) => Some(err),
+            TcsError::InvalidUrlSafeBase64(err) => Some(err),
             _ => None,
         }
     }

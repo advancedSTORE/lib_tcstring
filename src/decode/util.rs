@@ -1,5 +1,5 @@
 use crate::decode::{
-    error::TcfError,
+    error::TcsError,
     model::{RangeSection, RangeSectionType},
 };
 
@@ -41,7 +41,7 @@ pub(crate) fn parse_string_from_bytes(
     bit_start: usize,
     bit_width: usize,
     char_count: usize,
-) -> Result<String, TcfError> {
+) -> Result<String, TcsError> {
     byte_list_bit_boundary_check!(val, bit_start + (char_count * bit_width) - 1);
 
     let mut result = String::with_capacity(char_count);
@@ -51,7 +51,7 @@ pub(crate) fn parse_string_from_bytes(
         let alphabet_offset = parse_from_bytes(val, bit_start + offset, bit_width) as u8;
 
         if alphabet_offset > 25 {
-            return Err(TcfError::InvalidAlphabetOffset);
+            return Err(TcsError::InvalidAlphabetOffset);
         }
 
         result.push((b'A' + alphabet_offset) as char);
@@ -64,7 +64,7 @@ pub(crate) fn parse_string_from_bytes(
 pub(crate) fn parse_vendor_range_from_bytes(
     val: &[u8],
     bit_start: usize,
-) -> Result<RangeSection, TcfError> {
+) -> Result<RangeSection, TcsError> {
     let mut bit_index = bit_start + 12;
 
     byte_list_bit_boundary_check!(val, bit_index);

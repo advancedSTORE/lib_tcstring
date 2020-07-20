@@ -1,5 +1,5 @@
 use crate::decode::{
-    error::TcfError,
+    error::TcsError,
     model::{RangeSectionType, TCModelV1, VendorSet},
     util::{
         parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
@@ -9,26 +9,26 @@ use crate::decode::{
 use std::convert::TryFrom;
 
 impl TryFrom<&str> for TCModelV1 {
-    type Error = TcfError;
+    type Error = TcsError;
 
-    fn try_from(val: &str) -> Result<Self, TcfError> {
+    fn try_from(val: &str) -> Result<Self, TcsError> {
         match base64::decode_config(val, base64::URL_SAFE_NO_PAD) {
             Ok(decoded_bytes) => {
                 byte_list_bit_boundary_check!(val, 5);
 
                 if parse_from_bytes(&decoded_bytes, 0, 6) != 1 {
-                    return Err(TcfError::UnsupportedVersion);
+                    return Err(TcsError::UnsupportedVersion);
                 }
 
                 Self::try_from_vec(decoded_bytes)
             }
-            Err(err) => Err(TcfError::InvalidUrlSafeBase64(err)),
+            Err(err) => Err(TcsError::InvalidUrlSafeBase64(err)),
         }
     }
 }
 
 impl TCModelV1 {
-    fn try_from_vec(val: Vec<u8>) -> Result<Self, TcfError> {
+    fn try_from_vec(val: Vec<u8>) -> Result<Self, TcsError> {
         byte_list_bit_boundary_check!(val, 173);
 
         let max_vendor_id = parse_from_bytes(&val, 156, 16);
@@ -55,7 +55,7 @@ impl TCModelV1 {
                     list: vendor_list,
                 }
             } else {
-                return Err(TcfError::InvalidSectionDefinition);
+                return Err(TcsError::InvalidSectionDefinition);
             },
         })
     }
