@@ -32,6 +32,8 @@ pub use decode::model::{
     PublisherRestriction, PublisherRestrictionType, TCModel, TCModelV1, TCModelV2, VendorSet,
 };
 
+pub use decode::error::TcfError;
+
 mod tests {
     #[test]
     fn test_html_root_url() {
