@@ -1,6 +1,6 @@
 use crate::decode::{
     error::{
-        INSUFFICIENT_LENGTH, INVALID_SECTION_DEFINTION, INVALID_SEGMENT_DEFINITION,
+        INSUFFICIENT_LENGTH, INVALID_SECTION_DEFINITION, INVALID_SEGMENT_DEFINITION,
         INVALID_URL_SAFE_BASE64, UNEXPECTED_RANGE_SECTION, UNSUPPORTED_VERSION,
     },
     model::{
@@ -46,7 +46,7 @@ fn parse_publisher_restrictions_from_bytes(
             vendor_list: if let RangeSectionType::Vendor(vendor_set) = section.value {
                 vendor_set
             } else {
-                return Err(INVALID_SECTION_DEFINTION);
+                return Err(INVALID_SECTION_DEFINITION);
             },
         });
 

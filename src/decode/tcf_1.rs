@@ -1,5 +1,5 @@
 use crate::decode::{
-    error::{INVALID_SECTION_DEFINTION, INVALID_URL_SAFE_BASE64, UNSUPPORTED_VERSION},
+    error::{INVALID_SECTION_DEFINITION, INVALID_URL_SAFE_BASE64, UNSUPPORTED_VERSION},
     model::{RangeSectionType, TCModelV1, TCSDecodeError, VendorSet},
     util::{
         parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
@@ -55,7 +55,7 @@ impl TCModelV1 {
                     list: vendor_list,
                 }
             } else {
-                return Err(INVALID_SECTION_DEFINTION);
+                return Err(INVALID_SECTION_DEFINITION);
             },
         })
     }
