@@ -1,25 +1,25 @@
-//! # `iab_tcstring` is an TCF String library which will (currently only) decode a given TCString
+//! # `lib_tcstring` is an TCF String library which will (currently only) decode a given TCString
 //!
 //! NOTE: This is not an official IAB library
 //!
 //! General usage
-//! ```edition2018
+//! ```rust,edition2018
 //! use std::convert::TryFrom;
 //! // will return an Result which contains an TCModel V2
-//! let tc_model_v2 = iab_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+//! let tc_model_v2 = lib_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 //! // will return an Result which contains an TCModel V1
-//! let tc_model_v1 = iab_tcstring::TCModel::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
+//! let tc_model_v1 = lib_tcstring::TCModel::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
 //! ```
 //!
 //! If it's possible to know which TCModel version is used you can instead write it like this:
-//! ```edition2018
+//! ```rust,edition2018
 //! use std::convert::TryFrom;
-//! let tc_model_v2 = iab_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
-//! let tc_model_v1 = iab_tcstring::TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
+//! let tc_model_v2 = lib_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+//! let tc_model_v1 = lib_tcstring::TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
 //! ```
 
 #![warn(clippy::all)]
-#![doc(html_root_url = "https://docs.rs/iab_tcstring/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.1.0")]
 #![warn(missing_docs)]
 
 #[cfg(feature = "serde")]

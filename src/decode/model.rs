@@ -1,11 +1,11 @@
 /// `TCModel` serves as a convenience wrapper to parse a given TCString
 /// without checking the version on the calling side
 ///
-/// ```edition2018
+/// ```rust,edition2018
 /// use std::convert::TryFrom;
 /// // will return a Result which contains the variant for the TCString version or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = iab_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+/// let tc_model = lib_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 /// ```
 ///
 /// [`TCModelV1`]: struct.TCModelV1.html
@@ -69,11 +69,11 @@ pub struct VendorSet {
 /// * `PurposesAllowed` -> [`purpose_consents`]
 /// * `VendorConsents` -> [`vendors`]
 ///
-/// ```edition2018
+/// ```rust,edition2018
 /// use std::convert::TryFrom;
 /// // will return a Result which contains either the TCModel or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = iab_tcstring::TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
+/// let tc_model = lib_tcstring::TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
 /// ```
 ///
 /// [`created_at`]: struct.TCModelV1.html#structfield.created_at
@@ -150,11 +150,11 @@ pub struct TCModelV1 {
 /// * `CustomPurposesConsent` -> [`custom_purposes_consent`]
 /// * `CustomPurposesLITransparency` -> [`custom_purposes_li_transparency`]
 ///
-/// ```edition2018
+/// ```rust,edition2018
 /// use std::convert::TryFrom;
 /// // will return a Result which contains either the TCModel or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = iab_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+/// let tc_model = lib_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 /// ```
 ///
 /// [`created_at`]: struct.TCModelV2.html#structfield.created_at
