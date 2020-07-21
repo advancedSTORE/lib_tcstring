@@ -19,7 +19,7 @@
 //! ```
 
 #![warn(clippy::all)]
-#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.1.2")]
 #![warn(missing_docs)]
 
 #[cfg(feature = "serde")]

@@ -12,7 +12,7 @@ Please go to [docs.rs/lib_tcstring](https://docs.rs/lib_tcstring)
 `Cargo.toml`
 ```toml
 [dependencies]
-lib_tcstring = "0.1.0"
+lib_tcstring = "0.1.2"
 ```
 
 Code
