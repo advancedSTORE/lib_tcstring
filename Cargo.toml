@@ -1,16 +1,17 @@
 [package]
 name = "lib_tcstring"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Joerg Jennerjahn <joerg.jennerjahn@advanced-store.com>", "Friedemann Sommer <friedemann.sommer@advanced-store.com>"]
 edition = "2018"
 description = "IAB TCF (v1, v2) TCString utilities"
 homepage = "https://github.com/advancedSTORE/lib_tcstring"
 repository = "https://github.com/advancedSTORE/lib_tcstring"
-license-file = "LICENSE"
+license = "Apache-2.0"
 keywords = ["tcf", "tcstring", "string", "decode"]
 categories = ["parsing"]
 exclude = [".github/**", "Cargo.lock"]
 documentation = "https://docs.rs/lib_tcstring/"
+readme = "README.md"
 
 [features]
 default = []
@@ -24,3 +25,8 @@ version-sync = "0.9"
 [dependencies]
 base64 = "0.12"
 serde = { version = "1.0", features = ["derive"], optional = true }
+
+[badges]
+is-it-maintained-issue-resolution = { repository = "advancedSTORE/lib_tcstring" }
+is-it-maintained-open-issues = { repository = "advancedSTORE/lib_tcstring" }
+maintenance = { status = "passively-maintained" }
