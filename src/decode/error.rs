@@ -19,7 +19,7 @@ pub enum TcsError {
     InsufficientLength,
     /// TCString contains an invalid or unsupported version
     UnsupportedVersion,
-    /// TCString doesn't contain valid base64
+    /// TCString isn't valid base64
     InvalidUrlSafeBase64(DecodeError),
     /// TCString contains an invalid offset for string creation
     InvalidAlphabetOffset,

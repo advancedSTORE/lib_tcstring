@@ -1,4 +1,4 @@
-//! # `lib_tcstring` is an TCF String library which will (currently only) decode a given TCString
+//! # TCF String library which (currently only) decodes a given TCString
 //!
 //! NOTE: This is not an official IAB library
 //!
@@ -11,7 +11,7 @@
 //! let tc_model_v1 = lib_tcstring::TCModel::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
 //! ```
 //!
-//! If it's possible to know which TCModel version is used you can instead write it like this:
+//! If it's possible to know which TCModel version is used write it like this:
 //! ```rust,edition2018
 //! use std::convert::TryFrom;
 //! let tc_model_v2 = lib_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
@@ -19,7 +19,7 @@
 //! ```
 
 #![warn(clippy::all)]
-#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.1.2")]
+#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.2.0")]
 #![warn(missing_docs)]
 
 #[cfg(feature = "serde")]
@@ -30,11 +30,12 @@ extern crate serde;
 mod macros;
 mod decode;
 
-pub use decode::model::{
-    PublisherRestriction, PublisherRestrictionType, TCModel, TCModelV1, TCModelV2, VendorSet,
+pub use decode::{
+    error::TcsError,
+    model::{
+        PublisherRestriction, PublisherRestrictionType, TCModel, TCModelV1, TCModelV2, VendorSet,
+    },
 };
-
-pub use decode::error::TcsError;
 
 mod tests {
     #[test]
