@@ -7,9 +7,6 @@
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
 /// let tc_model = lib_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 /// ```
-///
-/// [`TCModelV1`]: struct.TCModelV1.html
-/// [`TCModelV2`]: struct.TCModelV2.html
 #[derive(PartialEq, Clone, Debug)]
 pub enum TCModel {
     /// Contains a reference to the [`TCModelV1`]
@@ -66,7 +63,7 @@ pub struct VendorSet {
 /// * `ConsentScreen` -> [`consent_screen`]
 /// * `ConsentLanguage` -> [`consent_lang`]
 /// * `VendorListVersion` -> [`vendor_list_version`]
-/// * `PurposesAllowed` -> [`purpose_consents`]
+/// * `PurposesAllowed` -> [`purposes_consent`]
 /// * `VendorConsents` -> [`vendors`]
 ///
 /// ```rust,edition2018
@@ -83,7 +80,7 @@ pub struct VendorSet {
 /// [`consent_screen`]: struct.TCModelV1.html#structfield.consent_screen
 /// [`consent_lang`]: struct.TCModelV1.html#structfield.consent_lang
 /// [`vendor_list_version`]: struct.TCModelV1.html#structfield.vendor_list_version
-/// [`purpose_consents`]: struct.TCModelV1.html#structfield.purpose_consents
+/// [`purposes_consent`]: struct.TCModelV1.html#structfield.purposes_consent
 /// [`vendors`]: struct.TCModelV1.html#structfield.vendors
 /// [`Vendor Consent String Format V1`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/ab7e3dcf8c493c743cac87c9bce49c16fc0523e4/Consent%20string%20and%20vendor%20list%20formats%20v1.1%20Final.md#vendor-consent-string-format-
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -105,9 +102,9 @@ pub struct TCModelV1 {
     pub consent_lang: String,
     /// Version of vendor list used in most recent consent string update
     pub vendor_list_version: u16,
-    /// List of all permitted purposes
-    pub purpose_consents: Vec<u8>,
-    /// List of all vendors which are either allowed or blocked
+    /// List of permitted purposes
+    pub purposes_consent: Vec<u8>,
+    /// List of allowed or blocked vendors
     ///
     /// See [`VendorSet`] for more details
     ///
@@ -115,7 +112,7 @@ pub struct TCModelV1 {
     pub vendors: VendorSet,
 }
 
-/// `TCModelV1` contains all relevant fields specified in the [`Vendor Consent String Format V2`]
+/// `TCModelV2` contains all relevant fields specified in the [`Vendor Consent String Format V2`]
 /// except for the `Version` field which is omitted
 ///
 /// Note that the "Core String", "Disclosed Vendors", "Allowed Vendors" and "Publisher TC" segments are mapped into fields
@@ -132,12 +129,12 @@ pub struct TCModelV1 {
 /// * `IsServiceSpecific` -> [`is_service_specific`]
 /// * `UseNonStandardStacks` -> [`use_non_standard_stacks`]
 /// * `SpecialFeatureOptIns` -> [`special_feature_opt_ins`]
-/// * `PurposesConsent` -> [`purpose_consents`]
-/// * `PurposesLITransparancy` -> [`purpose_li_transparency`]
+/// * `PurposesConsent` -> [`purposes_consent`]
+/// * `PurposesLITransparancy` -> [`purposes_li_transparency`]
 /// * `PurposeOneTreatment` -> [`purpose_one_treatment`]
 /// * `PublisherCC` -> [`publisher_country_code`]
-/// * `VendorsConsent` -> [`vendor_consents`]
-/// * `VendorsLIConsent` -> [`vendor_li_consents`]
+/// * `VendorsConsent` -> [`vendors_consent`]
+/// * `VendorsLIConsent` -> [`vendors_li_consent`]
 /// * `PublisherRestrictions` -> [`publisher_restrictions`]
 ///
 /// "Disclosed Vendors" segment is mapped by the [`disclosed_vendors`] field
@@ -168,12 +165,12 @@ pub struct TCModelV1 {
 /// [`is_service_specific`]: struct.TCModelV2.html#structfield.is_service_specific
 /// [`use_non_standard_stacks`]: struct.TCModelV2.html#structfield.use_non_standard_stacks
 /// [`special_feature_opt_ins`]: struct.TCModelV2.html#structfield.special_feature_opt_ins
-/// [`purpose_consents`]: struct.TCModelV2.html#structfield.purpose_consents
-/// [`purpose_li_transparency`]: struct.TCModelV2.html#structfield.purpose_li_transparency
+/// [`purposes_consent`]: struct.TCModelV2.html#structfield.purposes_consent
+/// [`purposes_li_transparency`]: struct.TCModelV2.html#structfield.purposes_li_transparency
 /// [`purpose_one_treatment`]: struct.TCModelV2.html#structfield.purpose_one_treatment
 /// [`publisher_country_code`]: struct.TCModelV2.html#structfield.publisher_country_code
-/// [`vendor_consents`]: struct.TCModelV2.html#structfield.vendor_consents
-/// [`vendor_li_consents`]: struct.TCModelV2.html#structfield.vendor_li_consents
+/// [`vendors_consent`]: struct.TCModelV2.html#structfield.vendors_consent
+/// [`vendors_li_consent`]: struct.TCModelV2.html#structfield.vendors_li_consent
 /// [`publisher_restrictions`]: struct.TCModelV2.html#structfield.publisher_restrictions
 /// [`disclosed_vendors`]: struct.TCModelV2.html#structfield.disclosed_vendors
 /// [`allowed_vendors`]: struct.TCModelV2.html#structfield.allowed_vendors
@@ -217,9 +214,9 @@ pub struct TCModelV2 {
     /// "Special Features" are numerically identified in the global vendor list separately from normal features
     pub special_feature_opt_ins: Vec<u8>,
     /// List of allowed purposes
-    pub purpose_consents: Vec<u8>,
+    pub purposes_consent: Vec<u8>,
     /// List of allowed "Legitimate Interest" purposes
-    pub purpose_li_transparency: Vec<u8>,
+    pub purposes_li_transparency: Vec<u8>,
     /// `true` means "Purpose 1" was not disclosed
     ///
     /// `false` means "Purpose 1" was disclosed commonly as consent
@@ -229,9 +226,9 @@ pub struct TCModelV2 {
     /// [`ISO 3166-1 alpha-2`]: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
     pub publisher_country_code: String,
     /// List of allowed vendors
-    pub vendor_consents: Vec<u16>,
+    pub vendors_consent: Vec<u16>,
     /// List of vendors "Legitimate Interest" disclosures
-    pub vendor_li_consents: Vec<u16>,
+    pub vendors_li_consent: Vec<u16>,
     /// List of publisher restrictions on a per purpose basis
     ///
     /// See [`PublisherRestriction`] for more details
@@ -252,7 +249,7 @@ pub struct TCModelV2 {
     pub custom_purposes_li_transparency: Vec<u8>,
 }
 
-/// Publisher restriction which overrides a specificed purpose
+/// Publisher restriction which overrides the specificed purpose
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct PublisherRestriction {
