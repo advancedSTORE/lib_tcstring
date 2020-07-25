@@ -9,13 +9,13 @@ on:
       - '**.rs'
       - 'Cargo.toml'
       - 'Cargo.lock'
-      - '.github/workflows/*.yml'
+      - '.github/workflows/rust.yml'
   pull_request:
     paths:
       - '**.rs'
       - 'Cargo.toml'
       - 'Cargo.lock'
-      - '.github/workflows/*.yml'
+      - '.github/workflows/rust.yml'
 
 jobs:
   check:
@@ -41,6 +41,8 @@ jobs:
         with:
           command: check
           args: '--all-targets'
+      - name: 'run "cargo deny check"'
+        uses: EmbarkStudios/cargo-deny-action@v1
 
   lint:
     runs-on: ubuntu-latest
