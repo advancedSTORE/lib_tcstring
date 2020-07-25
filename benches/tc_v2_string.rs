@@ -13,7 +13,11 @@ fn criterion_benchmark(c: &mut Criterion) {
         b.iter(|| TCModelV2::try_from(black_box("COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.YAAAAAAAAAAAAAAAAAA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA")))
     });
     c.bench_function("TCString V2 (core + publisher tc)", |b| {
-        b.iter(|| TCModelV2::try_from(black_box("COw4XqLOw4XqLAAAAAENAXCAAP-gAAAfwIAAACngAI8AAA.cAEAPAAAC7gAHw4AAA")))
+        b.iter(|| {
+            TCModelV2::try_from(black_box(
+                "COw4XqLOw4XqLAAAAAENAXCAAP-gAAAfwIAAACngAI8AAA.cAEAPAAAC7gAHw4AAA",
+            ))
+        })
     });
     c.bench_function("TCString V2 (core + disclosed vendors + allowed vendors + publisher tc)", |b| {
         b.iter(|| TCModelV2::try_from(black_box("COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AEFABgACAA4A.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA")))
