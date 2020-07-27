@@ -21,6 +21,7 @@
 #![warn(clippy::all)]
 #![doc(html_root_url = "https://docs.rs/lib_tcstring/0.2.0")]
 #![warn(missing_docs)]
+#![forbid(unsafe_code)]
 
 #[cfg(feature = "serde")]
 #[macro_use]

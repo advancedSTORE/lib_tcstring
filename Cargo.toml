@@ -16,10 +16,9 @@ readme = "README.md"
 [features]
 default = []
 
-[build-dependencies]
-clippy = "0.0.302"
-
 [dev-dependencies]
+clippy = "*"
+criterion = "0.3"
 version-sync = "0.9"
 
 [dependencies]
@@ -30,3 +29,11 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 is-it-maintained-issue-resolution = { repository = "advancedSTORE/lib_tcstring" }
 is-it-maintained-open-issues = { repository = "advancedSTORE/lib_tcstring" }
 maintenance = { status = "passively-maintained" }
+
+[[bench]]
+name = "tc_v1_string"
+harness = false
+
+[[bench]]
+name = "tc_v2_string"
+harness = false
