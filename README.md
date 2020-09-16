@@ -17,7 +17,7 @@ For major (or breaking) version changes see [CHANGELOG.md](./CHANGELOG.md)
 `Cargo.toml`
 ```toml
 [dependencies]
-lib_tcstring = "0.2.0"
+lib_tcstring = "0.2.1"
 ```
 
 Code
