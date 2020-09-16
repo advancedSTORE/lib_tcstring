@@ -69,9 +69,9 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
     byte_list_bit_boundary_check!(val, bit_index);
 
-    let num_entries = parse_from_bytes(val, bit_start, 12) as usize;
+    let num_entries = parse_from_bytes(val, bit_start, 12) as u16;
     let mut entry_list: Vec<u16> = Vec::new();
-    let mut count = 0;
+    let mut count = 0u16;
 
     while count < num_entries {
         if parse_from_bytes(val, bit_index, 1) as u8 == 1 {
@@ -84,19 +84,19 @@ pub(crate) fn parse_vendor_range_from_bytes(
                 entry_list.push(vendor_id);
             }
 
-            bit_index += 32;
+            bit_index += 33;
         } else {
             byte_list_bit_boundary_check!(val, bit_index + 16);
 
             entry_list.push(parse_from_bytes(val, bit_index + 1, 16) as u16);
-            bit_index += 16;
+            bit_index += 17;
         }
 
         count += 1;
     }
 
     Ok(RangeSection {
-        last_bit: bit_index - 1,
+        last_bit: bit_index,
         value: RangeSectionType::Vendor(entry_list),
     })
 }
