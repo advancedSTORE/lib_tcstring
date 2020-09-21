@@ -15,7 +15,7 @@ fn parse_publisher_restrictions_from_bytes(
     val: &[u8],
     bit_start: usize,
 ) -> Result<RangeSection, TcsError> {
-    byte_list_bit_boundary_check!(val, bit_start + 11);
+    byte_list_bit_boundary_check!(val, bit_start + 12);
 
     let restriction_count = parse_from_bytes(val, bit_start, 12) as usize;
     let mut publisher_restrictions: Vec<PublisherRestriction> =
@@ -72,7 +72,7 @@ fn parse_range_sections_from_bytes(
 
                 if parse_from_bytes(val, start + 16, 1) == 0 {
                     RangeSection {
-                        last_bit: start + 16 + max_vendor_id,
+                        last_bit: start + 17 + max_vendor_id,
                         value: if section_index == 0 {
                             RangeSectionType::Vendor(parse_u16_bitfield_from_bytes(
                                 val,
@@ -92,7 +92,7 @@ fn parse_range_sections_from_bytes(
                 parse_publisher_restrictions_from_bytes(val, start)?
             };
 
-        start = section.last_bit + 1;
+        start = section.last_bit;
         section_index += 1;
         sections.push(section);
     }
@@ -589,6 +589,70 @@ mod tests {
                 publisher_purposes_li_transparency: vec![1, 2, 3],
                 custom_purposes_consent: vec![2, 3, 4, 19, 20, 21, 22, 23],
                 custom_purposes_li_transparency: vec![5, 6, 7],
+            })
+        );
+    }
+
+    #[test]
+    fn iab_tcf_v2_core_publisher_meta_3() {
+        assert_eq!(
+            TCModelV2::try_from("CO4yYChO4yYChCnABBDEA0CsAP_AAAAAAAYgF-wDwAUAB6AEaAK4AaYA5AC6gH_ARqAkEBQ4CuwFvgLsAX6AAAAYJABAXmKgAgLzGQAQF5joAIC8yUAEBeZSACAvMAAA.f_gAAAAAAQAA"),
+            Ok(TCModelV2 {
+                created_at: 1598511529700,
+                updated_at: 1598511529700,
+                cmp_id: 167,
+                cmp_version: 1,
+                consent_screen: 1,
+                consent_language: String::from("DE"),
+                vendor_list_version: 52,
+                tcf_policy_version: 2,
+                is_service_specific: true,
+                use_non_standard_stacks: false,
+                special_feature_opt_ins: vec![1, 2],
+                purposes_consent: (1..11).collect(),
+                purposes_li_transparency: vec![],
+                purpose_one_treatment: false,
+                publisher_country_code: String::from("DE"),
+                vendors_consent: vec![40, 122, 141, 174, 211, 228, 373, 511, 565, 577, 647, 699, 735, 748, 765],
+                vendors_li_consent: vec![],
+                publisher_restrictions: vec![
+                    PublisherRestriction {
+                        purpose_id: 2,
+                        restriction_type: PublisherRestrictionType::RequireConsent,
+                        vendor_list: vec![755]
+                    },
+                    PublisherRestriction {
+                        purpose_id: 5,
+                        restriction_type: PublisherRestrictionType::RequireConsent,
+                        vendor_list: vec![755]
+                    },
+                    PublisherRestriction {
+                        purpose_id: 6,
+                        restriction_type: PublisherRestrictionType::RequireConsent,
+                        vendor_list: vec![755]
+                    },
+                    PublisherRestriction {
+                        purpose_id: 7,
+                        restriction_type: PublisherRestrictionType::RequireConsent,
+                        vendor_list: vec![755]
+                    },
+                    PublisherRestriction {
+                        purpose_id: 9,
+                        restriction_type: PublisherRestrictionType::RequireConsent,
+                        vendor_list: vec![755]
+                    },
+                    PublisherRestriction {
+                        purpose_id: 10,
+                        restriction_type: PublisherRestrictionType::RequireConsent,
+                        vendor_list: vec![755]
+                    }
+                ],
+                disclosed_vendors: vec![],
+                allowed_vendors: vec![],
+                publisher_purposes_consent: (1..11).collect(),
+                publisher_purposes_li_transparency: vec![],
+                custom_purposes_consent: vec![],
+                custom_purposes_li_transparency: vec![]
             })
         );
     }
