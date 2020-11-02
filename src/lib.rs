@@ -19,7 +19,7 @@
 //! ```
 
 #![warn(clippy::all)]
-#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.2.2")]
+#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.2.3")]
 #![warn(missing_docs)]
 #![forbid(unsafe_code)]
 

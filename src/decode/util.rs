@@ -42,7 +42,7 @@ pub(crate) fn parse_string_from_bytes(
     bit_width: usize,
     char_count: usize,
 ) -> Result<String, TcsError> {
-    byte_list_bit_boundary_check!(val, bit_start + (char_count * bit_width) - 1);
+    byte_list_bit_boundary_check!(val, bit_start + (char_count * bit_width));
 
     let mut result = String::with_capacity(char_count);
     let mut offset = 0;
@@ -75,7 +75,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
     while count < num_entries {
         if parse_from_bytes(val, bit_index, 1) as u8 == 1 {
-            byte_list_bit_boundary_check!(val, bit_index + 32);
+            byte_list_bit_boundary_check!(val, bit_index + 33);
 
             let start_vendor_id = parse_from_bytes(val, bit_index + 1, 16) as u16;
             let end_vendor_id = parse_from_bytes(val, bit_index + 17, 16) as u16;
@@ -86,7 +86,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
             bit_index += 33;
         } else {
-            byte_list_bit_boundary_check!(val, bit_index + 16);
+            byte_list_bit_boundary_check!(val, bit_index + 17);
 
             entry_list.push(parse_from_bytes(val, bit_index + 1, 16) as u16);
             bit_index += 17;
