@@ -66,31 +66,25 @@ fn parse_range_sections_from_bytes(
     let mut section_index = 0;
 
     while start < max_bit_length && section_index < 3 {
-        let section =
-            if section_index < 2 {
+        let section = if section_index < 2 {
+            if parse_from_bytes(val, start + 16, 1) == 0 {
                 let max_vendor_id = parse_from_bytes(val, start, 16) as usize;
+                let bitfield_value = parse_u16_bitfield_from_bytes(val, start + 17, max_vendor_id)?;
 
-                if parse_from_bytes(val, start + 16, 1) == 0 {
-                    RangeSection {
-                        last_bit: start + 17 + max_vendor_id,
-                        value: if section_index == 0 {
-                            RangeSectionType::Vendor(parse_u16_bitfield_from_bytes(
-                                val,
-                                start + 17,
-                                max_vendor_id,
-                            )?)
-                        } else {
-                            RangeSectionType::VendorLegitimateInterest(
-                                parse_u16_bitfield_from_bytes(val, start + 17, max_vendor_id)?,
-                            )
-                        },
-                    }
-                } else {
-                    parse_vendor_range_from_bytes(val, start + 17)?
+                RangeSection {
+                    last_bit: start + 17 + max_vendor_id,
+                    value: if section_index == 0 {
+                        RangeSectionType::Vendor(bitfield_value)
+                    } else {
+                        RangeSectionType::VendorLegitimateInterest(bitfield_value)
+                    },
                 }
             } else {
-                parse_publisher_restrictions_from_bytes(val, start)?
-            };
+                parse_vendor_range_from_bytes(val, start + 17)?
+            }
+        } else {
+            parse_publisher_restrictions_from_bytes(val, start)?
+        };
 
         start = section.last_bit;
         section_index += 1;
