@@ -48,7 +48,7 @@ impl TCModelV1 {
                     list: parse_u16_bitfield_from_bytes(&val, 173, max_vendor_id as usize)?,
                 }
             } else if let RangeSectionType::Vendor(vendor_list) =
-                parse_vendor_range_from_bytes(&val, 174)?.value
+                parse_vendor_range_from_bytes(&val, 174, &RangeSectionType::Vendor)?.value
             {
                 VendorSet {
                     is_blocklist: parse_from_bytes(&val, 173, 1) == 1,

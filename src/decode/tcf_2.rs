@@ -11,6 +11,11 @@ use crate::decode::{
 };
 use std::convert::TryFrom;
 
+const VENDOR_RANGE_SECTION_TYPES: &[fn(std::vec::Vec<u16>) -> RangeSectionType; 2] = &[
+    RangeSectionType::Vendor,
+    RangeSectionType::VendorLegitimateInterest,
+];
+
 fn parse_publisher_restrictions_from_bytes(
     val: &[u8],
     bit_start: usize,
@@ -28,7 +33,7 @@ fn parse_publisher_restrictions_from_bytes(
 
         let purpose_id = parse_from_bytes(val, bit_index, 6) as u8;
         let restriction_type = parse_from_bytes(val, bit_index + 6, 2) as u8;
-        let section = parse_vendor_range_from_bytes(val, bit_index + 8)?;
+        let section = parse_vendor_range_from_bytes(val, bit_index + 8, &RangeSectionType::Vendor)?;
 
         bit_index = section.last_bit;
 
@@ -73,14 +78,14 @@ fn parse_range_sections_from_bytes(
 
                 RangeSection {
                     last_bit: start + 17 + max_vendor_id,
-                    value: if section_index == 0 {
-                        RangeSectionType::Vendor(bitfield_value)
-                    } else {
-                        RangeSectionType::VendorLegitimateInterest(bitfield_value)
-                    },
+                    value: VENDOR_RANGE_SECTION_TYPES[section_index](bitfield_value),
                 }
             } else {
-                parse_vendor_range_from_bytes(val, start + 17)?
+                parse_vendor_range_from_bytes(
+                    val,
+                    start + 17,
+                    &VENDOR_RANGE_SECTION_TYPES[section_index],
+                )?
             }
         } else {
             parse_publisher_restrictions_from_bytes(val, start)?
@@ -100,7 +105,7 @@ fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u
     Ok(if parse_from_bytes(val, bit_start + 16, 1) == 0 {
         parse_u16_bitfield_from_bytes(val, bit_start + 17, max_vendor_id)?
     } else if let RangeSectionType::Vendor(vendor_set) =
-        parse_vendor_range_from_bytes(val, bit_start + 17)?.value
+        parse_vendor_range_from_bytes(val, bit_start + 17, &RangeSectionType::Vendor)?.value
     {
         vendor_set
     } else {
@@ -645,6 +650,39 @@ mod tests {
                 allowed_vendors: vec![],
                 publisher_purposes_consent: (1..11).collect(),
                 publisher_purposes_li_transparency: vec![],
+                custom_purposes_consent: vec![],
+                custom_purposes_li_transparency: vec![]
+            })
+        );
+    }
+
+    #[test]
+    fn iab_tcf2_core_section_parsing() {
+        assert_eq!(
+            TCModelV2::try_from("CO-Z5geO-Z5geAfbgBDEBECoAP_AAH_AAAigGfwFgADAAZABOACoAFgAMgAiAB-AERAIwAjQBMAEWAJwAXMAzgCCgEtALaAXmAxEBmgDPwM_gLAAGAAyACcAFQALAAZABEAD8AIiARgBGgCYAIsATgAuYBnAEFAJaAW0AvMBiIDNAGfgAA"),
+            Ok(TCModelV2 {
+                created_at: 1607936207800,
+                updated_at: 1607936207800,
+                cmp_id: 31,
+                cmp_version: 1760,
+                consent_screen: 1,
+                consent_language: String::from("DE"),
+                vendor_list_version: 68,
+                tcf_policy_version: 2,
+                is_service_specific: true,
+                use_non_standard_stacks: false,
+                special_feature_opt_ins: vec![1],
+                purposes_consent: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 
+                purposes_li_transparency: vec![2, 3, 4, 5, 6, 7, 8, 9, 10], 
+                purpose_one_treatment: false, 
+                publisher_country_code: String::from("EU"),
+                vendors_consent: vec![6, 25, 39, 42, 44, 50, 68, 126, 136, 140, 141, 152, 278, 312, 371, 412, 522, 602, 730, 755, 785, 820, 831], 
+                vendors_li_consent: vec![6, 25, 39, 42, 44, 50, 68, 126, 136, 140, 141, 152, 278, 312, 371, 412, 522, 602, 730, 755, 785, 820, 831],
+                publisher_restrictions: vec![], 
+                disclosed_vendors: vec![], 
+                allowed_vendors: vec![], 
+                publisher_purposes_consent: vec![],
+                publisher_purposes_li_transparency: vec![], 
                 custom_purposes_consent: vec![],
                 custom_purposes_li_transparency: vec![]
             })
