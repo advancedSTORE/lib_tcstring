@@ -1,6 +1,6 @@
 [package]
 name = "lib_tcstring"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Joerg Jennerjahn <joerg.jennerjahn@advanced-store.com>", "Friedemann Sommer <friedemann.sommer@advanced-store.com>"]
 edition = "2018"
 description = "IAB TCF (v1, v2) TCString utilities"

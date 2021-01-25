@@ -64,6 +64,7 @@ pub(crate) fn parse_string_from_bytes(
 pub(crate) fn parse_vendor_range_from_bytes(
     val: &[u8],
     bit_start: usize,
+    value_type: &dyn Fn(Vec<u16>) -> RangeSectionType,
 ) -> Result<RangeSection, TcsError> {
     let mut bit_index = bit_start + 12;
 
@@ -97,7 +98,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
     Ok(RangeSection {
         last_bit: bit_index,
-        value: RangeSectionType::Vendor(entry_list),
+        value: value_type(entry_list),
     })
 }
 
