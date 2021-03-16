@@ -1,4 +1,7 @@
-![CI](https://github.com/advancedSTORE/lib_tcstring/workflows/CI/badge.svg)
+![Crates.io license](https://img.shields.io/crates/l/lib_tcstring?style=flat-square)
+![Crates.io version](https://img.shields.io/crates/v/lib_tcstring?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/advancedSTORE/lib_tcstring/CI?style=flat-square)
+![dependency status for latest release](https://img.shields.io/librariesio/release/cargo/lib_tcstring?style=flat-square)
 
 # IAB TCString library
 
