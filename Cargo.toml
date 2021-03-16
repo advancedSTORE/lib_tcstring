@@ -26,9 +26,10 @@ base64 = "0.13"
 serde = { version = "1.0", features = ["derive"], optional = true }
 
 [badges]
-is-it-maintained-issue-resolution = { repository = "advancedSTORE/lib_tcstring" }
-is-it-maintained-open-issues = { repository = "advancedSTORE/lib_tcstring" }
 maintenance = { status = "passively-maintained" }
+
+[profile.bench]
+lto = true
 
 [[bench]]
 name = "tc_v1_string"
