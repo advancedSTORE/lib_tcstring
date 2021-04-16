@@ -1,8 +1,8 @@
 use crate::decode::{
     error::TcsError,
     model::{
-        PublisherRestriction, PublisherRestrictionType, PublisherTC, RangeSection,
-        RangeSectionType, TCModelV2, TCSegment,
+        PublisherRestriction, PublisherRestrictionType, PublisherTc, RangeSection,
+        RangeSectionType, TcModelV2, TcSegment,
     },
     util::{
         parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
@@ -113,10 +113,10 @@ fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u
     })
 }
 
-fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<PublisherTC, TcsError> {
+fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<PublisherTc, TcsError> {
     let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6) as usize;
 
-    Ok(PublisherTC {
+    Ok(PublisherTc {
         publisher_purposes_consent: parse_u8_bitfield_from_bytes(val, bit_start, 24)?,
         publisher_purposes_li_transparency: parse_u8_bitfield_from_bytes(val, bit_start + 24, 24)?,
         custom_purposes_consent: if custom_purposes_count > 0 {
@@ -136,8 +136,8 @@ fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<Publish
     })
 }
 
-fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TCSegment, TcsError> {
-    let mut tc_segment = TCSegment {
+fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TcSegment, TcsError> {
+    let mut tc_segment = TcSegment {
         disclosed_vendors: None,
         allowed_vendors: None,
         publisher_tc: None,
@@ -163,7 +163,7 @@ fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TCSegment, TcsError> 
     Ok(tc_segment)
 }
 
-impl TryFrom<&str> for TCModelV2 {
+impl TryFrom<&str> for TcModelV2 {
     type Error = TcsError;
 
     fn try_from(val: &str) -> Result<Self, Self::Error> {
@@ -190,7 +190,7 @@ impl TryFrom<&str> for TCModelV2 {
     }
 }
 
-impl TCModelV2 {
+impl TcModelV2 {
     fn try_from_vec(val: Vec<Vec<u8>>) -> Result<Self, TcsError> {
         let core_segment = val[0].as_slice();
 
@@ -243,8 +243,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_vendor_range() {
         assert_eq!(
-            TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA"),
+            Ok(TcModelV2 {
                 created_at: 1582243059300,
                 updated_at: 1582243059300,
                 cmp_id: 27,
@@ -276,8 +276,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_disclosed_allowed_vendors_publisher_meta() {
         assert_eq!(
-            TCModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.YAAAAAAAAAAAAAAAAAA"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.YAAAAAAAAAAAAAAAAAA"),
+            Ok(TcModelV2 {
                 created_at: 1585246887500,
                 updated_at: 1585246887500,
                 cmp_id: 0,
@@ -309,8 +309,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_disclosed_allowed_vendors_publisher_meta_order() {
         assert_eq!(
-            TCModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.YAAAAAAAAAAAAAAAAAA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.YAAAAAAAAAAAAAAAAAA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA"),
+            Ok(TcModelV2 {
                 created_at: 1585246887500,
                 updated_at: 1585246887500,
                 cmp_id: 0,
@@ -342,8 +342,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_vendor_vendor_li_range_1() {
         assert_eq!(
-            TCModelV2::try_from("CGL23UdMFJzvuA9ACCENAXCEAC0AAGrAAA5YA5ht7-_d_7_vd-f-nrf4_4A4hM4JCKoK4YhmAqABgAEgAA"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("CGL23UdMFJzvuA9ACCENAXCEAC0AAGrAAA5YA5ht7-_d_7_vd-f-nrf4_4A4hM4JCKoK4YhmAqABgAEgAA"),
+            Ok(TcModelV2 {
                 created_at: 664138268500,
                 updated_at: 1297135921400,
                 cmp_id: 61,
@@ -375,8 +375,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_disclosed_vendors_range() {
         assert_eq!(
-            TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA.IFoEUQQgAIQwgIwQABAEAAAAOIAACAIAAAAQAIAgEAACEAAAAAgAQBAAAAAAAGBAAgAAAAAAAFAAECAAAgAAQARAEQAAAAAJAAIAAgAAAYQEAAAQmAgBC3ZAYzUw"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA.IFoEUQQgAIQwgIwQABAEAAAAOIAACAIAAAAQAIAgEAACEAAAAAgAQBAAAAAAAGBAAgAAAAAAAFAAECAAAgAAQARAEQAAAAAJAAIAAgAAAYQEAAAQmAgBC3ZAYzUw"),
+            Ok(TcModelV2 {
                 created_at: 1582243059300,
                 updated_at: 1582243059300,
                 cmp_id: 27,
@@ -408,10 +408,10 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_publisher_meta() {
         assert_eq!(
-            TCModelV2::try_from(
+            TcModelV2::try_from(
                 "COw4XqLOw4XqLAAAAAENAXCAAP-gAAAfwIAAACngAI8AAA.cAEAPAAAC7gAHw4AAA"
             ),
-            Ok(TCModelV2 {
+            Ok(TcModelV2 {
                 created_at: 1585246887500,
                 updated_at: 1585246887500,
                 cmp_id: 0,
@@ -443,8 +443,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_disclosed_allowed_vendor_publisher_meta() {
         assert_eq!(
-            TCModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AEFABgACAA4A.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA"),
-            Ok(TCModelV2{
+            TcModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AEFABgACAA4A.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA"),
+            Ok(TcModelV2{
                 created_at: 1585246887500,
                 updated_at: 1585246887500,
                 cmp_id: 0,
@@ -480,9 +480,9 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_publisher_meta_2() {
         assert_eq!(
-            TCModelV2::try_from("CO51ctPO51ctPCnABBDEA3CsAP_AAAAAAAYgGkNf_X_fb2vj-_5999t0eY1f9_63v-wzjgeNs-8Nyd_X_L4Xr2MyvB36pq4KuR4Eu3LBAQdlHOHcTQmQwIkVqTLsbk2Mq7NKJ7LEilMbM2dYGH9vn9XTuZCY70_sf__z_3-_-___67f-L2wAAADhIBQAFQAQAA0ACYAE8ARwAtwB-gIvAXmKgBgBMAEcAvMZADACYAI4BeY6AaABUAEAANAAmABPAEcAJgAW4A_QCLAIvAXmAxglAFACYAI4AW4CLwF5lIBYAFQAQAA0ACYAE8AW4A_QCLAIvAXmAxghACACYAI4.f_gAAAAAAWAA"),
+            TcModelV2::try_from("CO51ctPO51ctPCnABBDEA3CsAP_AAAAAAAYgGkNf_X_fb2vj-_5999t0eY1f9_63v-wzjgeNs-8Nyd_X_L4Xr2MyvB36pq4KuR4Eu3LBAQdlHOHcTQmQwIkVqTLsbk2Mq7NKJ7LEilMbM2dYGH9vn9XTuZCY70_sf__z_3-_-___67f-L2wAAADhIBQAFQAQAA0ACYAE8ARwAtwB-gIvAXmKgBgBMAEcAvMZADACYAI4BeY6AaABUAEAANAAmABPAEcAJgAW4A_QCLAIvAXmAxglAFACYAI4AW4CLwF5lIBYAFQAQAA0ACYAE8AW4A_QCLAIvAXmAxghACACYAI4.f_gAAAAAAWAA"),
             Ok(
-                TCModelV2 {
+                TcModelV2 {
                     created_at: 1600269806300,
                     updated_at: 1600269806300,
                     cmp_id: 167,
@@ -551,8 +551,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_disclosed_allowed_vendor_publisher_meta_2() {
         assert_eq!(
-            TCModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AIFABgACAA4SADAAgADQ.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AIFABgACAA4SADAAgADQ.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA"),
+            Ok(TcModelV2 {
                 created_at: 1585246887500,
                 updated_at: 1585246887500,
                 cmp_id: 0,
@@ -595,8 +595,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_core_publisher_meta_3() {
         assert_eq!(
-            TCModelV2::try_from("CO4yYChO4yYChCnABBDEA0CsAP_AAAAAAAYgF-wDwAUAB6AEaAK4AaYA5AC6gH_ARqAkEBQ4CuwFvgLsAX6AAAAYJABAXmKgAgLzGQAQF5joAIC8yUAEBeZSACAvMAAA.f_gAAAAAAQAA"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("CO4yYChO4yYChCnABBDEA0CsAP_AAAAAAAYgF-wDwAUAB6AEaAK4AaYA5AC6gH_ARqAkEBQ4CuwFvgLsAX6AAAAYJABAXmKgAgLzGQAQF5joAIC8yUAEBeZSACAvMAAA.f_gAAAAAAQAA"),
+            Ok(TcModelV2 {
                 created_at: 1598511529700,
                 updated_at: 1598511529700,
                 cmp_id: 167,
@@ -659,8 +659,8 @@ mod tests {
     #[test]
     fn iab_tcf2_core_section_parsing() {
         assert_eq!(
-            TCModelV2::try_from("CO-Z5geO-Z5geAfbgBDEBECoAP_AAH_AAAigGfwFgADAAZABOACoAFgAMgAiAB-AERAIwAjQBMAEWAJwAXMAzgCCgEtALaAXmAxEBmgDPwM_gLAAGAAyACcAFQALAAZABEAD8AIiARgBGgCYAIsATgAuYBnAEFAJaAW0AvMBiIDNAGfgAA"),
-            Ok(TCModelV2 {
+            TcModelV2::try_from("CO-Z5geO-Z5geAfbgBDEBECoAP_AAH_AAAigGfwFgADAAZABOACoAFgAMgAiAB-AERAIwAjQBMAEWAJwAXMAzgCCgEtALaAXmAxEBmgDPwM_gLAAGAAyACcAFQALAAZABEAD8AIiARgBGgCYAIsATgAuYBnAEFAJaAW0AvMBiIDNAGfgAA"),
+            Ok(TcModelV2 {
                 created_at: 1607936207800,
                 updated_at: 1607936207800,
                 cmp_id: 31,
