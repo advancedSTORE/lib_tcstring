@@ -1,6 +1,6 @@
 use crate::decode::{
     error::TcsError,
-    model::{RangeSectionType, TCModelV1, VendorSet},
+    model::{RangeSectionType, TcModelV1, VendorSet},
     util::{
         parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
         parse_u8_bitfield_from_bytes, parse_vendor_range_from_bytes,
@@ -8,7 +8,7 @@ use crate::decode::{
 };
 use std::convert::TryFrom;
 
-impl TryFrom<&str> for TCModelV1 {
+impl TryFrom<&str> for TcModelV1 {
     type Error = TcsError;
 
     fn try_from(val: &str) -> Result<Self, TcsError> {
@@ -27,7 +27,7 @@ impl TryFrom<&str> for TCModelV1 {
     }
 }
 
-impl TCModelV1 {
+impl TcModelV1 {
     fn try_from_vec(val: Vec<u8>) -> Result<Self, TcsError> {
         byte_list_bit_boundary_check!(val, 173);
 
@@ -68,8 +68,8 @@ mod tests {
     #[test]
     fn iab_tcf_v1_single_blocked_vendor() {
         assert_eq!(
-            TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA"),
-            Ok(TCModelV1 {
+            TcModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA"),
+            Ok(TcModelV1 {
                 created_at: 15100821554,
                 updated_at: 15100821554,
                 cmp_id: 7,
@@ -89,8 +89,8 @@ mod tests {
     #[test]
     fn iab_tcf_v1_allowed_vendor_range_1() {
         assert_eq!(
-                TCModelV1::try_from("BOyRMJVO2IaNjAKAiBENDR-AAAAwxrv7_77e_9f-_f__9uj3Gr_v_f__3mccL5tv3hv7v6_7fi_-1nV4u_1tft9ydk1-5YtDzto507iakiPHmqNeb1n_mz1eZpRP58E09j53z7Ew_v8_v-b7BCPN_Y3v-8K96lGA"),
-                Ok(TCModelV1 {
+                TcModelV1::try_from("BOyRMJVO2IaNjAKAiBENDR-AAAAwxrv7_77e_9f-_f__9uj3Gr_v_f__3mccL5tv3hv7v6_7fi_-1nV4u_1tft9ydk1-5YtDzto507iakiPHmqNeb1n_mz1eZpRP58E09j53z7Ew_v8_v-b7BCPN_Y3v-8K96lGA"),
+                Ok(TcModelV1 {
                     created_at: 15875752533,
                     updated_at: 15940559715,
                     cmp_id: 10,
@@ -110,8 +110,8 @@ mod tests {
     #[test]
     fn iab_tcf_v1_allowed_vendor_range_2() {
         assert_eq!(
-            TCModelV1::try_from("BO2IUIWO2IUIWB9ABADEDR-AAAAwyABgACBhgA"),
-            Ok(TCModelV1 {
+            TcModelV1::try_from("BO2IUIWO2IUIWB9ABADEDR-AAAAwyABgACBhgA"),
+            Ok(TcModelV1 {
                 created_at: 15940534806,
                 updated_at: 15940534806,
                 cmp_id: 125,

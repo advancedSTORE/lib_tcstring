@@ -8,16 +8,16 @@ pub(crate) mod util;
 
 use crate::decode::{
     error::TcsError,
-    model::{TCModel, TCModelV1, TCModelV2},
+    model::{TcModel, TcModelV1, TcModelV2},
 };
 
-impl TryFrom<&str> for TCModel {
+impl TryFrom<&str> for TcModel {
     type Error = TcsError;
 
-    fn try_from(val: &str) -> Result<TCModel, Self::Error> {
+    fn try_from(val: &str) -> Result<TcModel, Self::Error> {
         Ok(match val.chars().next() {
-            Some('B') => TCModel::V1(Box::new(TCModelV1::try_from(val)?)),
-            Some('C') => TCModel::V2(Box::new(TCModelV2::try_from(val)?)),
+            Some('B') => TcModel::V1(Box::new(TcModelV1::try_from(val)?)),
+            Some('C') => TcModel::V2(Box::new(TcModelV2::try_from(val)?)),
             _ => return Err(TcsError::UnsupportedVersion),
         })
     }
@@ -31,8 +31,8 @@ mod tests {
     #[test]
     fn iab_tcf_v1_tc_model_sample() {
         assert_eq!(
-            TCModel::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA"),
-            Ok(TCModel::V1(Box::new(TCModelV1 {
+            TcModel::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA"),
+            Ok(TcModel::V1(Box::new(TcModelV1 {
                 created_at: 15100821554,
                 updated_at: 15100821554,
                 cmp_id: 7,
@@ -52,8 +52,8 @@ mod tests {
     #[test]
     fn iab_tcf_v2_tc_model_sample() {
         assert_eq!(
-            TCModel::try_from("COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AEFABgACAA4A.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA"),
-            Ok(TCModel::V2(Box::new(TCModelV2{
+            TcModel::try_from("COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AEFABgACAA4A.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA"),
+            Ok(TcModel::V2(Box::new(TcModelV2{
                 created_at: 1585246887500,
                 updated_at: 1585246887500,
                 cmp_id: 0,

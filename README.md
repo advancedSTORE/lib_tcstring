@@ -25,7 +25,7 @@ For major (or breaking) version changes see [CHANGELOG.md](./CHANGELOG.md)
 
 ```toml
 [dependencies]
-lib_tcstring = "0.2.4"
+lib_tcstring = "0.3.0"
 ```
 
 Code
@@ -33,5 +33,5 @@ Code
 ```rust
 use std::convert::TryFrom;
 
-let tc_model_v2 = lib_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+let tc_model_v2 = lib_tcstring::TcModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 ```

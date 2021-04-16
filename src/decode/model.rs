@@ -1,22 +1,22 @@
-/// `TCModel` serves as a convenience wrapper to parse a given TCString
+/// `TcModel` serves as a convenience wrapper to parse a given TCString
 /// without checking the version on the calling side
 ///
 /// ```rust,edition2018
 /// use std::convert::TryFrom;
 /// // will return a Result which contains the variant for the TCString version or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = lib_tcstring::TCModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+/// let tc_model = lib_tcstring::TcModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 /// ```
 #[derive(PartialEq, Clone, Debug)]
-pub enum TCModel {
-    /// Contains a reference to the [`TCModelV1`]
+pub enum TcModel {
+    /// Contains a reference to the [`TcModelV1`]
     ///
-    /// [`TCModelV1`]: struct.TCModelV1.html
-    V1(Box<TCModelV1>),
-    /// Contains a reference to the [`TCModelV2`]
+    /// [`TcModelV1`]: struct.TcModelV1.html
+    V1(Box<TcModelV1>),
+    /// Contains a reference to the [`TcModelV2`]
     ///
-    /// [`TCModelV2`]: struct.TCModelV2.html
-    V2(Box<TCModelV2>),
+    /// [`TcModelV2`]: struct.TcModelV2.html
+    V2(Box<TcModelV2>),
 }
 
 /// Contains restriction types as defined in [`Vendor Consent String Format V2 Core String`]
@@ -52,7 +52,7 @@ pub struct VendorSet {
     pub list: Vec<u16>,
 }
 
-/// `TCModelV1` contains all relevant fields specified in the [`Vendor Consent String Format V1`]
+/// `TcModelV1` contains all relevant fields specified in the [`Vendor Consent String Format V1`]
 /// except for the `Version` field which is omitted
 ///
 /// Field mapping
@@ -68,24 +68,24 @@ pub struct VendorSet {
 ///
 /// ```rust,edition2018
 /// use std::convert::TryFrom;
-/// // will return a Result which contains either the TCModel or an Error
+/// // will return a Result which contains either the TcModel or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = lib_tcstring::TCModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
+/// let tc_model = lib_tcstring::TcModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
 /// ```
 ///
-/// [`created_at`]: struct.TCModelV1.html#structfield.created_at
-/// [`updated_at`]: struct.TCModelV1.html#structfield.updated_at
-/// [`cmp_id`]: struct.TCModelV1.html#structfield.cmp_id
-/// [`cmp_version`]: struct.TCModelV1.html#structfield.cmp_version
-/// [`consent_screen`]: struct.TCModelV1.html#structfield.consent_screen
-/// [`consent_lang`]: struct.TCModelV1.html#structfield.consent_lang
-/// [`vendor_list_version`]: struct.TCModelV1.html#structfield.vendor_list_version
-/// [`purposes_consent`]: struct.TCModelV1.html#structfield.purposes_consent
-/// [`vendors`]: struct.TCModelV1.html#structfield.vendors
+/// [`created_at`]: struct.TcModelV1.html#structfield.created_at
+/// [`updated_at`]: struct.TcModelV1.html#structfield.updated_at
+/// [`cmp_id`]: struct.TcModelV1.html#structfield.cmp_id
+/// [`cmp_version`]: struct.TcModelV1.html#structfield.cmp_version
+/// [`consent_screen`]: struct.TcModelV1.html#structfield.consent_screen
+/// [`consent_lang`]: struct.TcModelV1.html#structfield.consent_lang
+/// [`vendor_list_version`]: struct.TcModelV1.html#structfield.vendor_list_version
+/// [`purposes_consent`]: struct.TcModelV1.html#structfield.purposes_consent
+/// [`vendors`]: struct.TcModelV1.html#structfield.vendors
 /// [`Vendor Consent String Format V1`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/ab7e3dcf8c493c743cac87c9bce49c16fc0523e4/Consent%20string%20and%20vendor%20list%20formats%20v1.1%20Final.md#vendor-consent-string-format-
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
-pub struct TCModelV1 {
+pub struct TcModelV1 {
     /// Epoch milliseconds when consent string was first created
     pub created_at: u64,
     /// Epoch milliseconds when consent string was last updated
@@ -112,7 +112,7 @@ pub struct TCModelV1 {
     pub vendors: VendorSet,
 }
 
-/// `TCModelV2` contains all relevant fields specified in the [`Vendor Consent String Format V2`]
+/// `TcModelV2` contains all relevant fields specified in the [`Vendor Consent String Format V2`]
 /// except for the `Version` field which is omitted
 ///
 /// Note that the "Core String", "Disclosed Vendors", "Allowed Vendors" and "Publisher TC" segments are mapped into fields
@@ -149,39 +149,39 @@ pub struct TCModelV1 {
 ///
 /// ```rust,edition2018
 /// use std::convert::TryFrom;
-/// // will return a Result which contains either the TCModel or an Error
+/// // will return a Result which contains either the TcModel or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = lib_tcstring::TCModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+/// let tc_model = lib_tcstring::TcModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
 /// ```
 ///
-/// [`created_at`]: struct.TCModelV2.html#structfield.created_at
-/// [`updated_at`]: struct.TCModelV2.html#structfield.updated_at
-/// [`cmp_id`]: struct.TCModelV2.html#structfield.cmp_id
-/// [`cmp_version`]: struct.TCModelV2.html#structfield.cmp_version
-/// [`consent_screen`]: struct.TCModelV2.html#structfield.consent_screen
-/// [`consent_language`]: struct.TCModelV2.html#structfield.consent_language
-/// [`vendor_list_version`]: struct.TCModelV2.html#structfield.vendor_list_version
-/// [`tcf_policy_version`]: struct.TCModelV2.html#structfield.tcf_policy_version
-/// [`is_service_specific`]: struct.TCModelV2.html#structfield.is_service_specific
-/// [`use_non_standard_stacks`]: struct.TCModelV2.html#structfield.use_non_standard_stacks
-/// [`special_feature_opt_ins`]: struct.TCModelV2.html#structfield.special_feature_opt_ins
-/// [`purposes_consent`]: struct.TCModelV2.html#structfield.purposes_consent
-/// [`purposes_li_transparency`]: struct.TCModelV2.html#structfield.purposes_li_transparency
-/// [`purpose_one_treatment`]: struct.TCModelV2.html#structfield.purpose_one_treatment
-/// [`publisher_country_code`]: struct.TCModelV2.html#structfield.publisher_country_code
-/// [`vendors_consent`]: struct.TCModelV2.html#structfield.vendors_consent
-/// [`vendors_li_consent`]: struct.TCModelV2.html#structfield.vendors_li_consent
-/// [`publisher_restrictions`]: struct.TCModelV2.html#structfield.publisher_restrictions
-/// [`disclosed_vendors`]: struct.TCModelV2.html#structfield.disclosed_vendors
-/// [`allowed_vendors`]: struct.TCModelV2.html#structfield.allowed_vendors
-/// [`publisher_purposes_consent`]: struct.TCModelV2.html#structfield.publisher_purposes_consent
-/// [`publisher_purposes_li_transparency`]: struct.TCModelV2.html#structfield.publisher_purposes_li_transparency
-/// [`custom_purposes_consent`]: struct.TCModelV2.html#structfield.custom_purposes_consent
-/// [`custom_purposes_li_transparency`]: struct.TCModelV2.html#structfield.custom_purposes_li_transparency
+/// [`created_at`]: struct.TcModelV2.html#structfield.created_at
+/// [`updated_at`]: struct.TcModelV2.html#structfield.updated_at
+/// [`cmp_id`]: struct.TcModelV2.html#structfield.cmp_id
+/// [`cmp_version`]: struct.TcModelV2.html#structfield.cmp_version
+/// [`consent_screen`]: struct.TcModelV2.html#structfield.consent_screen
+/// [`consent_language`]: struct.TcModelV2.html#structfield.consent_language
+/// [`vendor_list_version`]: struct.TcModelV2.html#structfield.vendor_list_version
+/// [`tcf_policy_version`]: struct.TcModelV2.html#structfield.tcf_policy_version
+/// [`is_service_specific`]: struct.TcModelV2.html#structfield.is_service_specific
+/// [`use_non_standard_stacks`]: struct.TcModelV2.html#structfield.use_non_standard_stacks
+/// [`special_feature_opt_ins`]: struct.TcModelV2.html#structfield.special_feature_opt_ins
+/// [`purposes_consent`]: struct.TcModelV2.html#structfield.purposes_consent
+/// [`purposes_li_transparency`]: struct.TcModelV2.html#structfield.purposes_li_transparency
+/// [`purpose_one_treatment`]: struct.TcModelV2.html#structfield.purpose_one_treatment
+/// [`publisher_country_code`]: struct.TcModelV2.html#structfield.publisher_country_code
+/// [`vendors_consent`]: struct.TcModelV2.html#structfield.vendors_consent
+/// [`vendors_li_consent`]: struct.TcModelV2.html#structfield.vendors_li_consent
+/// [`publisher_restrictions`]: struct.TcModelV2.html#structfield.publisher_restrictions
+/// [`disclosed_vendors`]: struct.TcModelV2.html#structfield.disclosed_vendors
+/// [`allowed_vendors`]: struct.TcModelV2.html#structfield.allowed_vendors
+/// [`publisher_purposes_consent`]: struct.TcModelV2.html#structfield.publisher_purposes_consent
+/// [`publisher_purposes_li_transparency`]: struct.TcModelV2.html#structfield.publisher_purposes_li_transparency
+/// [`custom_purposes_consent`]: struct.TcModelV2.html#structfield.custom_purposes_consent
+/// [`custom_purposes_li_transparency`]: struct.TcModelV2.html#structfield.custom_purposes_li_transparency
 /// [`Vendor Consent String Format V2`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/81a3b9ed1545148be380b4408e6361cd2294446d/TCFv2/IAB%20Tech%20Lab%20-%20Consent%20string%20and%20vendor%20list%20formats%20v2.md#tc-string-format
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
-pub struct TCModelV2 {
+pub struct TcModelV2 {
     /// Epoch milliseconds when this TC String was first created
     pub created_at: u64,
     /// Epoch milliseconds when TC String was last updated
@@ -271,10 +271,10 @@ pub(crate) enum RangeSectionType {
 }
 
 #[cfg_attr(test, derive(Debug))]
-pub(crate) struct TCSegment {
+pub(crate) struct TcSegment {
     pub disclosed_vendors: Option<Vec<u16>>,
     pub allowed_vendors: Option<Vec<u16>>,
-    pub publisher_tc: Option<PublisherTC>,
+    pub publisher_tc: Option<PublisherTc>,
 }
 
 #[cfg_attr(test, derive(Debug))]
@@ -284,14 +284,14 @@ pub(crate) struct RangeSection {
 }
 
 #[cfg_attr(test, derive(Debug))]
-pub(crate) struct PublisherTC {
+pub(crate) struct PublisherTc {
     pub publisher_purposes_consent: Vec<u8>,
     pub publisher_purposes_li_transparency: Vec<u8>,
     pub custom_purposes_consent: Vec<u8>,
     pub custom_purposes_li_transparency: Vec<u8>,
 }
 
-impl Default for PublisherTC {
+impl Default for PublisherTc {
     fn default() -> Self {
         Self {
             custom_purposes_consent: vec![],
@@ -315,14 +315,14 @@ impl VendorSet {
     }
 }
 
-impl TCModelV1 {
+impl TcModelV1 {
     #[allow(dead_code)]
     fn new() -> Self {
         Self::default()
     }
 }
 
-impl TCModelV2 {
+impl TcModelV2 {
     #[allow(dead_code)]
     fn new() -> Self {
         Self::default()
