@@ -37,7 +37,7 @@ jobs:
           toolchain: stable
           override: true
       - name: 'check dependencies'
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1.0.3
         with:
           command: check
           args: '--all-targets'
@@ -64,12 +64,12 @@ jobs:
           override: true
           components: 'rustfmt, clippy'
       - name: 'run rustfmt'
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1.0.3
         with:
           command: fmt
           args: '--all -- --check'
       - name: 'run clippy'
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1.0.3
         with:
           command: clippy
           args: '--all-targets -- -D warnings'
@@ -93,7 +93,7 @@ jobs:
           toolchain: stable
           override: true
       - name: 'run tests'
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1.0.3
         with:
           command: test
           args: '--all-targets'
