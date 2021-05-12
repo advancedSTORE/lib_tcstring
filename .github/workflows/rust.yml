@@ -42,7 +42,7 @@ jobs:
           command: check
           args: '--all-targets'
       - name: 'run "cargo deny check"'
-        uses: EmbarkStudios/cargo-deny-action@v1
+        uses: EmbarkStudios/cargo-deny-action@v1.2.6
 
   lint:
     runs-on: ubuntu-latest
