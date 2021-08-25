@@ -33,5 +33,9 @@ Code
 ```rust
 use std::convert::TryFrom;
 
-let tc_model_v2 = lib_tcstring::TcModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+fn main() {
+    let tc_model_v2 = lib_tcstring::TcModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
+
+    println!("{:?}", tc_model_v2);
+}
 ```
