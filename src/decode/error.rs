@@ -27,7 +27,7 @@ pub enum TcsError {
     InvalidSectionDefinition,
     /// TCString contains an invalid segment definition
     InvalidSegmentDefinition,
-    /// TCString contains an unkown range section definition
+    /// TCString contains an unknown range section definition
     UnexpectedRangeSection,
 }
 

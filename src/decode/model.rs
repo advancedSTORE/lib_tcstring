@@ -130,7 +130,7 @@ pub struct TcModelV1 {
 /// * `UseNonStandardStacks` -> [`use_non_standard_stacks`]
 /// * `SpecialFeatureOptIns` -> [`special_feature_opt_ins`]
 /// * `PurposesConsent` -> [`purposes_consent`]
-/// * `PurposesLITransparancy` -> [`purposes_li_transparency`]
+/// * `PurposesLITransparency` -> [`purposes_li_transparency`]
 /// * `PurposeOneTreatment` -> [`purpose_one_treatment`]
 /// * `PublisherCC` -> [`publisher_country_code`]
 /// * `VendorsConsent` -> [`vendors_consent`]
@@ -249,7 +249,7 @@ pub struct TcModelV2 {
     pub custom_purposes_li_transparency: Vec<u8>,
 }
 
-/// Publisher restriction which overrides the specificed purpose
+/// Publisher restriction which overrides the specified purpose
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct PublisherRestriction {
