@@ -17,9 +17,8 @@ readme = "README.md"
 default = []
 
 [dev-dependencies]
-clippy = "0.0.302"
-criterion = "0.3"
-version-sync = "0.9"
+criterion = "0.3.5"
+version-sync = "0.9.4"
 
 [dependencies]
 base64 = "0.13"
