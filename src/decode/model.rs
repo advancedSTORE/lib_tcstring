@@ -284,22 +284,12 @@ pub(crate) struct RangeSection {
 }
 
 #[cfg_attr(test, derive(Debug))]
+#[derive(Default)]
 pub(crate) struct PublisherTc {
     pub publisher_purposes_consent: Vec<u8>,
     pub publisher_purposes_li_transparency: Vec<u8>,
     pub custom_purposes_consent: Vec<u8>,
     pub custom_purposes_li_transparency: Vec<u8>,
-}
-
-impl Default for PublisherTc {
-    fn default() -> Self {
-        Self {
-            custom_purposes_consent: vec![],
-            custom_purposes_li_transparency: vec![],
-            publisher_purposes_consent: vec![],
-            publisher_purposes_li_transparency: vec![],
-        }
-    }
 }
 
 impl Default for PublisherRestrictionType {
