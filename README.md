@@ -5,7 +5,7 @@
 
 # IAB TCString library
 
-A utility library to work with the IAB TCF v1 & v2 strings.
+A utility library to work with the IAB TCF v2 strings.
 
 **NOTE**: This is not an official IAB library
 
