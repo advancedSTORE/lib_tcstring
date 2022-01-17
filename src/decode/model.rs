@@ -1,24 +1,3 @@
-/// `TcModel` serves as a convenience wrapper to parse a given TCString
-/// without checking the version on the calling side
-///
-/// ```rust,edition2018
-/// use std::convert::TryFrom;
-/// // will return a Result which contains the variant for the TCString version or an Error
-/// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = lib_tcstring::TcModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
-/// ```
-#[derive(PartialEq, Clone, Debug)]
-pub enum TcModel {
-    /// Contains a reference to the [`TcModelV1`]
-    ///
-    /// [`TcModelV1`]: struct.TcModelV1.html
-    V1(Box<TcModelV1>),
-    /// Contains a reference to the [`TcModelV2`]
-    ///
-    /// [`TcModelV2`]: struct.TcModelV2.html
-    V2(Box<TcModelV2>),
-}
-
 /// Contains restriction types as defined in [`Vendor Consent String Format V2 Core String`]
 ///
 /// [`Vendor Consent String Format V2 Core String`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/81a3b9ed1545148be380b4408e6361cd2294446d/TCFv2/IAB%20Tech%20Lab%20-%20Consent%20string%20and%20vendor%20list%20formats%20v2.md#the-core-string
@@ -33,83 +12,6 @@ pub enum PublisherRestrictionType {
     RequireLegitimateInterest,
     /// Should not be used
     Undefined,
-}
-
-/// `VendorSet` contains a list of vendors which are either allowed or blocked
-/// based on the [`is_blocklist`] field
-///
-/// [`is_blocklist`]: struct.VendorSet.html#structfield.is_blocklist
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
-pub struct VendorSet {
-    /// `is_blocklist` defines if [`list`] is an blocklist or an allowlist
-    ///
-    /// [`list`]: struct.VendorSet.html#structfield.list
-    pub is_blocklist: bool,
-    /// List of vendors which are either allowed or blocked based on the [`is_blocklist`]
-    ///
-    /// [`is_blocklist`]: struct.VendorSet.html#structfield.is_blocklist
-    pub list: Vec<u16>,
-}
-
-/// `TcModelV1` contains all relevant fields specified in the [`Vendor Consent String Format V1`]
-/// except for the `Version` field which is omitted
-///
-/// Field mapping
-/// * `Created` -> [`created_at`]
-/// * `LastUpdated` -> [`updated_at`]
-/// * `CmpId` -> [`cmp_id`]
-/// * `CmpVersion` -> [`cmp_version`]
-/// * `ConsentScreen` -> [`consent_screen`]
-/// * `ConsentLanguage` -> [`consent_lang`]
-/// * `VendorListVersion` -> [`vendor_list_version`]
-/// * `PurposesAllowed` -> [`purposes_consent`]
-/// * `VendorConsents` -> [`vendors`]
-///
-/// ```rust,edition2018
-/// use std::convert::TryFrom;
-/// // will return a Result which contains either the TcModel or an Error
-/// // if the TCString could not be parsed or the TCString includes an unsupported version
-/// let tc_model = lib_tcstring::TcModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
-/// ```
-///
-/// [`created_at`]: struct.TcModelV1.html#structfield.created_at
-/// [`updated_at`]: struct.TcModelV1.html#structfield.updated_at
-/// [`cmp_id`]: struct.TcModelV1.html#structfield.cmp_id
-/// [`cmp_version`]: struct.TcModelV1.html#structfield.cmp_version
-/// [`consent_screen`]: struct.TcModelV1.html#structfield.consent_screen
-/// [`consent_lang`]: struct.TcModelV1.html#structfield.consent_lang
-/// [`vendor_list_version`]: struct.TcModelV1.html#structfield.vendor_list_version
-/// [`purposes_consent`]: struct.TcModelV1.html#structfield.purposes_consent
-/// [`vendors`]: struct.TcModelV1.html#structfield.vendors
-/// [`Vendor Consent String Format V1`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/ab7e3dcf8c493c743cac87c9bce49c16fc0523e4/Consent%20string%20and%20vendor%20list%20formats%20v1.1%20Final.md#vendor-consent-string-format-
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
-pub struct TcModelV1 {
-    /// Epoch milliseconds when consent string was first created
-    pub created_at: u64,
-    /// Epoch milliseconds when consent string was last updated
-    pub updated_at: u64,
-    /// Consent Manager Provider ID that last updated the consent string
-    pub cmp_id: u16,
-    /// Consent Manager Provider version
-    pub cmp_version: u16,
-    /// Screen number in the CMP where consent was given
-    pub consent_screen: u8,
-    /// [`ISO 639-1`] language code in which the CMP UI was presented
-    ///
-    /// [`ISO 639-1`]: https://en.wikipedia.org/wiki/ISO_639-1
-    pub consent_lang: String,
-    /// Version of vendor list used in most recent consent string update
-    pub vendor_list_version: u16,
-    /// List of permitted purposes
-    pub purposes_consent: Vec<u8>,
-    /// List of allowed or blocked vendors
-    ///
-    /// See [`VendorSet`] for more details
-    ///
-    /// [`VendorSet`]: struct.VendorSet.html
-    pub vendors: VendorSet,
 }
 
 /// `TcModelV2` contains all relevant fields specified in the [`Vendor Consent String Format V2`]
@@ -295,33 +197,5 @@ pub(crate) struct PublisherTc {
 impl Default for PublisherRestrictionType {
     fn default() -> Self {
         Self::Undefined
-    }
-}
-
-impl VendorSet {
-    #[allow(dead_code)]
-    fn new() -> Self {
-        Self::default()
-    }
-}
-
-impl TcModelV1 {
-    #[allow(dead_code)]
-    fn new() -> Self {
-        Self::default()
-    }
-}
-
-impl TcModelV2 {
-    #[allow(dead_code)]
-    fn new() -> Self {
-        Self::default()
-    }
-}
-
-impl PublisherRestriction {
-    #[allow(dead_code)]
-    fn new() -> Self {
-        Self::default()
     }
 }

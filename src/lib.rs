@@ -6,20 +6,11 @@
 //! ```rust,edition2018
 //! use std::convert::TryFrom;
 //! // returns a Result which contains a TcModel V2
-//! let tc_model_v2 = lib_tcstring::TcModel::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
-//! // returns a Result which contains a TcModel V1
-//! let tc_model_v1 = lib_tcstring::TcModel::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
-//! ```
-//!
-//! If it's possible to know which TcModel version is used write it like this:
-//! ```rust,edition2018
-//! use std::convert::TryFrom;
 //! let tc_model_v2 = lib_tcstring::TcModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
-//! let tc_model_v1 = lib_tcstring::TcModelV1::try_from("BOEFEAyOEFEAyAHABDENAI4AAAB9vABAASA");
 //! ```
 
 #![warn(clippy::all)]
-#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.3.0")]
+#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.4.0")]
 #![warn(missing_docs)]
 #![forbid(unsafe_code)]
 
@@ -32,9 +23,7 @@ mod decode;
 
 pub use decode::{
     error::TcsError,
-    model::{
-        PublisherRestriction, PublisherRestrictionType, TcModel, TcModelV1, TcModelV2, VendorSet,
-    },
+    model::{PublisherRestriction, PublisherRestrictionType, TcModelV2},
 };
 
 mod tests {

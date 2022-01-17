@@ -25,7 +25,7 @@ For major (or breaking) version changes see [CHANGELOG.md](./CHANGELOG.md)
 
 ```toml
 [dependencies]
-lib_tcstring = "0.3.0"
+lib_tcstring = "0.4.0"
 ```
 
 Code
