@@ -5,7 +5,7 @@
 
 # IAB TCString library
 
-A utility library to work with the IAB TCF v1 & v2 strings.
+A utility library to work with the IAB TCF v2 strings.
 
 **NOTE**: This is not an official IAB library
 
@@ -25,7 +25,7 @@ For major (or breaking) version changes see [CHANGELOG.md](./CHANGELOG.md)
 
 ```toml
 [dependencies]
-lib_tcstring = "0.3.0"
+lib_tcstring = "0.4.0"
 ```
 
 Code

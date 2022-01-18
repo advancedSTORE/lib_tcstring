@@ -1,9 +1,9 @@
 [package]
 name = "lib_tcstring"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Joerg Jennerjahn <joerg.jennerjahn@advanced-store.com>", "Friedemann Sommer <friedemann.sommer@advanced-store.com>"]
 edition = "2018"
-description = "IAB TCF (v1, v2) TCString utilities"
+description = "IAB TCF v2 TCString utilities"
 homepage = "https://github.com/advancedSTORE/lib_tcstring"
 repository = "https://github.com/advancedSTORE/lib_tcstring"
 license = "Apache-2.0"
@@ -29,10 +29,6 @@ maintenance = { status = "passively-maintained" }
 
 [profile.bench]
 lto = true
-
-[[bench]]
-name = "tc_v1_string"
-harness = false
 
 [[bench]]
 name = "tc_v2_string"
