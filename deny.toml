@@ -38,7 +38,8 @@ notice = "warn"
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
 ignore = [
-    "RUSTSEC-2021-0127" # serde_cbor (can't be changed since it's a dependency of criterion)
+    "RUSTSEC-2021-0127", # serde_cbor v0.11.2 (dependency of "criterion")
+    "RUSTSEC-2022-0013", # regex v1.5.4 (depedency of "version-sync" and "criterion")
 ]
 # Determines what happens when a crate with an unsound advisory is encountered.
 unsound = "deny"
