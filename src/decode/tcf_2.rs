@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use crate::decode::{
     error::TcsError,
     model::{
@@ -9,9 +11,8 @@ use crate::decode::{
         parse_u8_bitfield_from_bytes, parse_vendor_range_from_bytes,
     },
 };
-use std::convert::TryFrom;
 
-const VENDOR_RANGE_SECTION_TYPES: &[fn(std::vec::Vec<u16>) -> RangeSectionType; 2] = &[
+const VENDOR_RANGE_SECTION_TYPES: &[fn(Vec<u16>) -> RangeSectionType; 2] = &[
     RangeSectionType::Vendor,
     RangeSectionType::VendorLegitimateInterest,
 ];

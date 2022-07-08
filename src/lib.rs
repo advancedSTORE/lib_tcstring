@@ -17,14 +17,14 @@
 #[cfg(feature = "serde")]
 extern crate serde;
 
-#[macro_use]
-mod macros;
-mod decode;
-
 pub use decode::{
     error::TcsError,
     model::{PublisherRestriction, PublisherRestrictionType, TcModelV2},
 };
+
+#[macro_use]
+mod macros;
+mod decode;
 
 mod tests {
     #[test]

@@ -6,7 +6,7 @@ macro_rules! byte_list_bit_boundary_check {
         let bit_index: usize = $bit_index;
 
         if length * 8 < bit_index {
-            return Err(crate::decode::error::TcsError::InsufficientLength);
+            return Err($crate::decode::error::TcsError::InsufficientLength);
         }
     }};
 }
@@ -18,7 +18,7 @@ macro_rules! range_section_value {
         let sections = &mut $sections;
 
         if sections.is_empty() {
-            return Err(crate::decode::error::TcsError::InvalidSectionDefinition);
+            return Err($crate::decode::error::TcsError::InvalidSectionDefinition);
         }
 
         if let RangeSection {
@@ -28,7 +28,7 @@ macro_rules! range_section_value {
         {
             section
         } else {
-            return Err(crate::decode::error::TcsError::InvalidSectionDefinition);
+            return Err($crate::decode::error::TcsError::InvalidSectionDefinition);
         }
     }};
 }
@@ -41,7 +41,7 @@ macro_rules! parse_bitfield_from_bytes {
             val: &[u8],
             bit_start: usize,
             bit_length: usize,
-        ) -> Result<Vec<$type>, crate::decode::error::TcsError> {
+        ) -> Result<Vec<$type>, $crate::decode::error::TcsError> {
             let bit_end = bit_start + bit_length;
 
             byte_list_bit_boundary_check!(val, bit_end);
