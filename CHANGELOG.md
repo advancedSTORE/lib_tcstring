@@ -1,25 +1,28 @@
 # v0.4
+
 * removed `TcModel` (obsolete since there is only one version, use `TcModelV2::try_from` instead)
 * removed `TcModelV1`
 * removed `VendorSet`
 * removed `::new()` implementation for the following `struct`s (use `::default()` instead)
-  * `TcModelV2`
-  * `PublisherRestriction`
+    * `TcModelV2`
+    * `PublisherRestriction`
 
 # v0.3
+
 * renamed `TCModel` to `TcModel`
 * renamed `TCModelV1` to `TcModelV1`
 * renamed `TCModelV2` to `TcModelV2`
 * `TcModelV2`
-  * renamed `TCSegment` to `TcSegment`
-  * renamed `PublisherTC` to `PublisherTc`
+    * renamed `TCSegment` to `TcSegment`
+    * renamed `PublisherTC` to `PublisherTc`
 
 # v0.2
+
 * `TCModelV1`
-  * renamed `purpose_consents` to `purposes_consent`
+    * renamed `purpose_consents` to `purposes_consent`
 * `TCModelV2`
-  * renamed the following fields
-    * `purpose_consents` -> `purposes_consent`
-    * `purpose_li_transparency` -> `purposes_li_transparency`
-    * `vendor_consents` -> `vendors_consent`
-    * `vendor_li_consents` -> `vendors_li_consent`
+    * renamed the following fields
+        * `purpose_consents` -> `purposes_consent`
+        * `purpose_li_transparency` -> `purposes_li_transparency`
+        * `vendor_consents` -> `vendors_consent`
+        * `vendor_li_consents` -> `vendors_li_consent`

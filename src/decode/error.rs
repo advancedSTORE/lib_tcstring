@@ -14,7 +14,7 @@ pub const INVALID_SEGMENT_DEFINITION: &str = "ERR_INVALID_SEGMENT_DEFINITION";
 pub const UNEXPECTED_RANGE_SECTION: &str = "ERR_UNEXPECTED_RANGE_SECTION";
 
 /// Errors that can occur while decoding the TCString
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TcsError {
     /// TCString doesn't have enough bits
     InsufficientLength,

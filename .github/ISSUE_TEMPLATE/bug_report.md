@@ -17,9 +17,10 @@ Steps to reproduce the behavior.
 A clear and concise description of what you expected to happen.
 
 **Build system**
- - OS: [e.g. linux]
- - rust version [e.g. 1.44.1]
- - library Version [e.g. 0.1.0]
+
+- OS: [e.g. linux]
+- rust version [e.g. 1.44.1]
+- library Version [e.g. 0.1.0]
 
 **Additional context**
 Add any other context about the problem here.

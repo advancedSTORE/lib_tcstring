@@ -2,7 +2,7 @@
 ///
 /// [`Vendor Consent String Format V2 Core String`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/81a3b9ed1545148be380b4408e6361cd2294446d/TCFv2/IAB%20Tech%20Lab%20-%20Consent%20string%20and%20vendor%20list%20formats%20v2.md#the-core-string
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(PartialEq, Clone, PartialOrd, Hash, Debug)]
+#[derive(PartialEq, Eq, Clone, PartialOrd, Hash, Debug)]
 pub enum PublisherRestrictionType {
     /// Purpose Flatly Not Allowed by Publisher
     NotAllowed,
@@ -82,7 +82,7 @@ pub enum PublisherRestrictionType {
 /// [`custom_purposes_li_transparency`]: struct.TcModelV2.html#structfield.custom_purposes_li_transparency
 /// [`Vendor Consent String Format V2`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/81a3b9ed1545148be380b4408e6361cd2294446d/TCFv2/IAB%20Tech%20Lab%20-%20Consent%20string%20and%20vendor%20list%20formats%20v2.md#tc-string-format
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
+#[derive(PartialEq, Eq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct TcModelV2 {
     /// Epoch milliseconds when this TC String was first created
     pub created_at: u64,
@@ -153,7 +153,7 @@ pub struct TcModelV2 {
 
 /// Publisher restriction which overrides the specified purpose
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(PartialEq, Clone, PartialOrd, Hash, Debug, Default)]
+#[derive(PartialEq, Eq, Clone, PartialOrd, Hash, Debug, Default)]
 pub struct PublisherRestriction {
     /// ID of publisher restricted purpose
     pub purpose_id: u8,
