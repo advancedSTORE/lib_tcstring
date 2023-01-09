@@ -1,6 +1,6 @@
 ![Crates.io license](https://img.shields.io/crates/l/lib_tcstring?style=flat-square)
 ![Crates.io version](https://img.shields.io/crates/v/lib_tcstring?style=flat-square)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/advancedSTORE/lib_tcstring/CI?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/advancedSTORE/lib_tcstring/rust.yml?style=flat-square&branch=master)
 ![dependency status for latest release](https://img.shields.io/librariesio/release/cargo/lib_tcstring?style=flat-square)
 
 # IAB TCString library
@@ -25,7 +25,7 @@ For major (or breaking) version changes see [CHANGELOG.md](./CHANGELOG.md)
 
 ```toml
 [dependencies]
-lib_tcstring = "0.4.0"
+lib_tcstring = "0.4.1"
 ```
 
 Code
