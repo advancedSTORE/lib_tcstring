@@ -1,5 +1,7 @@
 use std::convert::TryFrom;
 
+use base64::Engine;
+
 use crate::decode::{
     error::TcsError,
     model::{
@@ -16,6 +18,14 @@ const VENDOR_RANGE_SECTION_TYPES: &[fn(Vec<u16>) -> RangeSectionType; 2] = &[
     RangeSectionType::Vendor,
     RangeSectionType::VendorLegitimateInterest,
 ];
+
+const BASE64_ENGINE: base64::engine::general_purpose::GeneralPurpose =
+    base64::engine::general_purpose::GeneralPurpose::new(
+        &base64::alphabet::URL_SAFE,
+        base64::engine::general_purpose::GeneralPurposeConfig::new()
+            .with_encode_padding(false)
+            .with_decode_padding_mode(base64::engine::DecodePaddingMode::RequireNone),
+    );
 
 fn parse_publisher_restrictions_from_bytes(
     val: &[u8],
@@ -179,12 +189,10 @@ impl TryFrom<&str> for TcModelV2 {
                 return Err(TcsError::InsufficientLength);
             }
 
-            tcs_segments.push(
-                match base64::decode_config(base64_str, base64::URL_SAFE_NO_PAD) {
-                    Ok(decoded_bytes) => decoded_bytes,
-                    Err(err) => return Err(TcsError::InvalidUrlSafeBase64(err)),
-                },
-            );
+            tcs_segments.push(match BASE64_ENGINE.decode(base64_str) {
+                Ok(decoded_bytes) => decoded_bytes,
+                Err(err) => return Err(TcsError::InvalidUrlSafeBase64(err)),
+            });
         }
 
         Self::try_from_vec(tcs_segments)
