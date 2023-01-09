@@ -10,7 +10,7 @@
 //! ```
 
 #![warn(clippy::all)]
-#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/lib_tcstring/0.4.1")]
 #![warn(missing_docs)]
 #![forbid(unsafe_code)]
 

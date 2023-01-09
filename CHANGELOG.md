@@ -1,3 +1,7 @@
+# v0.4.1
+
+* updated dependency [base64](https://crates.io/crates/base64) to version `0.21`
+
 # v0.4
 
 * removed `TcModel` (obsolete since there is only one version, use `TcModelV2::try_from` instead)
