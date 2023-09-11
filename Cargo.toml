@@ -18,7 +18,7 @@ default = []
 
 [dev-dependencies]
 criterion = "0.5.1"
-version-sync = "0.9.4"
+version-sync = "0.9.5"
 
 [dependencies]
 base64 = "0.21"
