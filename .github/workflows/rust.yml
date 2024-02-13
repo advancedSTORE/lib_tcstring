@@ -29,7 +29,7 @@ jobs:
       - name: check dependencies
         run: cargo check --all-targets
       - name: run "cargo deny check"
-        uses: EmbarkStudios/cargo-deny-action@v1.5.13
+        uses: EmbarkStudios/cargo-deny-action@v1.5.15
 
   lint:
     runs-on: ubuntu-latest
