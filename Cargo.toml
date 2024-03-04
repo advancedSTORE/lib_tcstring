@@ -21,7 +21,7 @@ criterion = "0.5.1"
 version-sync = "0.9.5"
 
 [dependencies]
-base64 = "0.21"
+base64 = "0.22"
 serde = { version = "1.0", features = ["derive"], optional = true }
 
 [badges]
