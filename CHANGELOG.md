@@ -1,3 +1,8 @@
+# v0.5
+
+* changed the edition from 2018 to 2021
+* updated dependency [base64](https://crates.io/crates/base64) to version `0.22`
+
 # v0.4.1
 
 * updated dependency [base64](https://crates.io/crates/base64) to version `0.21`

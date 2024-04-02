@@ -17,7 +17,7 @@ Please go to [docs.rs/lib_tcstring](https://docs.rs/lib_tcstring)
 
 ## Changelog
 
-For major (or breaking) version changes see [CHANGELOG.md](./CHANGELOG.md)
+For major (or breaking) version changes, see [CHANGELOG.md](./CHANGELOG.md)
 
 ## Example
 
@@ -25,7 +25,7 @@ For major (or breaking) version changes see [CHANGELOG.md](./CHANGELOG.md)
 
 ```toml
 [dependencies]
-lib_tcstring = "0.4.1"
+lib_tcstring = "0.5.0"
 ```
 
 Code
