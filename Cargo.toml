@@ -2,7 +2,7 @@
 name = "lib_tcstring"
 version = "0.4.1"
 authors = ["Joerg Jennerjahn <joerg.jennerjahn@advanced-store.com>", "Friedemann Sommer <friedemann.sommer@advanced-store.com>"]
-edition = "2018"
+edition = "2021"
 description = "IAB TCF v2 TCString utilities"
 homepage = "https://github.com/advancedSTORE/lib_tcstring"
 repository = "https://github.com/advancedSTORE/lib_tcstring"

@@ -49,7 +49,7 @@ pub enum PublisherRestrictionType {
 /// * `CustomPurposesConsent` -> [`custom_purposes_consent`]
 /// * `CustomPurposesLITransparency` -> [`custom_purposes_li_transparency`]
 ///
-/// ```rust,edition2018
+/// ```rust,edition2021
 /// use std::convert::TryFrom;
 /// // will return a Result which contains either the TcModel or an Error
 /// // if the TCString could not be parsed or the TCString includes an unsupported version

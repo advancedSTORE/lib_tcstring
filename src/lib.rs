@@ -3,7 +3,7 @@
 //! NOTE: This is not an official IAB library
 //!
 //! General usage
-//! ```rust,edition2018
+//! ```rust,edition2021
 //! use std::convert::TryFrom;
 //! // returns a Result which contains a TcModel V2
 //! let tc_model_v2 = lib_tcstring::TcModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA");
