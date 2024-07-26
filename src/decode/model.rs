@@ -131,7 +131,7 @@ pub struct TcModelV2 {
     pub vendors_consent: Vec<u16>,
     /// List of vendors "Legitimate Interest" disclosures
     pub vendors_li_consent: Vec<u16>,
-    /// List of publisher restrictions on a per purpose basis
+    /// List of publisher restrictions on a per-purpose basis
     ///
     /// See [`PublisherRestriction`] for more details
     ///
@@ -139,7 +139,7 @@ pub struct TcModelV2 {
     pub publisher_restrictions: Vec<PublisherRestriction>,
     /// List of vendors that have been disclosed to a given user by a CMP
     pub disclosed_vendors: Vec<u16>,
-    /// List of vendors the publisher permits to use OOB legal bases
+    /// List of vendors the publisher permits using OOB legal bases
     pub allowed_vendors: Vec<u16>,
     /// List of purposes which are established on the legal basis of consent, for the publisher
     pub publisher_purposes_consent: Vec<u8>,
@@ -147,7 +147,7 @@ pub struct TcModelV2 {
     pub publisher_purposes_li_transparency: Vec<u8>,
     /// List of allowed custom purposes, for the publisher
     pub custom_purposes_consent: Vec<u8>,
-    /// List of custom purposes which are are established on the legal basis of "Legitimate Interest"
+    /// List of custom purposes which are established on the legal basis of "Legitimate Interest"
     pub custom_purposes_li_transparency: Vec<u8>,
 }
 
@@ -157,7 +157,7 @@ pub struct TcModelV2 {
 pub struct PublisherRestriction {
     /// ID of publisher restricted purpose
     pub purpose_id: u8,
-    /// publisher restriction for this purpose, see [`PublisherRestrictionType`] for more details
+    /// Publisher restriction for this purpose, see [`PublisherRestrictionType`] for more details
     ///
     /// [`PublisherRestrictionType`]: enum.PublisherRestrictionType.html
     pub restriction_type: PublisherRestrictionType,
