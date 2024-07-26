@@ -1,18 +1,5 @@
 #[doc(hidden)]
 #[macro_export]
-macro_rules! byte_list_bit_boundary_check {
-    ($byte_list: expr, $bit_index: expr) => {{
-        let length = $byte_list.len();
-        let bit_index: usize = $bit_index;
-
-        if length * 8 < bit_index {
-            return Err($crate::decode::error::TcsError::InsufficientLength);
-        }
-    }};
-}
-
-#[doc(hidden)]
-#[macro_export]
 macro_rules! range_section_value {
     ($sections: expr, $variant: path) => {{
         let sections = &mut $sections;
@@ -44,7 +31,7 @@ macro_rules! parse_bitfield_from_bytes {
         ) -> Result<Vec<$type>, $crate::decode::error::TcsError> {
             let bit_end = bit_start + bit_length;
 
-            byte_list_bit_boundary_check!(val, bit_end);
+            $crate::decode::util::byte_list_bit_boundary_check(val, bit_end)?;
 
             let mut result: Vec<$type> = Vec::with_capacity(bit_length);
 

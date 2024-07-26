@@ -9,8 +9,8 @@ use crate::decode::{
         RangeSectionType, TcModelV2, TcSegment,
     },
     util::{
-        parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
-        parse_u8_bitfield_from_bytes, parse_vendor_range_from_bytes,
+        byte_list_bit_boundary_check, parse_from_bytes, parse_string_from_bytes,
+        parse_u16_bitfield_from_bytes, parse_u8_bitfield_from_bytes, parse_vendor_range_from_bytes,
     },
 };
 
@@ -27,35 +27,36 @@ const BASE64_ENGINE: base64::engine::general_purpose::GeneralPurpose =
             .with_decode_padding_mode(base64::engine::DecodePaddingMode::RequireNone),
     );
 
-fn parse_publisher_restrictions_from_bytes(
-    val: &[u8],
-    bit_start: usize,
-) -> Result<RangeSection, TcsError> {
-    byte_list_bit_boundary_check!(val, bit_start + 12);
+const RESTRICTION_COUNT_BITS: usize = 12;
+const PURPOSE_ID_BITS: usize = 6;
+const RESTRICTION_TYPE_BITS: usize = 2;
+const SECTION_TYPE_BITS: usize = 1;
+const MAX_BIT_LENGTH_MULTIPLIER: usize = 8;
 
-    let restriction_count = parse_from_bytes(val, bit_start, 12) as usize;
+fn parse_publisher_restrictions_from_bytes(
+    bytes: &[u8],
+    start_bit: usize,
+) -> Result<RangeSection, TcsError> {
+    byte_list_bit_boundary_check(bytes, start_bit + RESTRICTION_COUNT_BITS)?;
+
+    let restriction_count = parse_from_bytes(bytes, start_bit, RESTRICTION_COUNT_BITS) as usize;
     let mut publisher_restrictions: Vec<PublisherRestriction> =
         Vec::with_capacity(restriction_count);
-    let mut index: usize = 0;
-    let mut bit_index = bit_start + 12;
+    let mut index = 0;
+    let mut bit_index = start_bit + RESTRICTION_COUNT_BITS;
 
     while index < restriction_count {
-        byte_list_bit_boundary_check!(val, bit_index + 8);
-
-        let purpose_id = parse_from_bytes(val, bit_index, 6) as u8;
-        let restriction_type = parse_from_bytes(val, bit_index + 6, 2) as u8;
-        let section = parse_vendor_range_from_bytes(val, bit_index + 8, &RangeSectionType::Vendor)?;
-
+        byte_list_bit_boundary_check(bytes, bit_index + 8)?;
+        let purpose_id = parse_from_bytes(bytes, bit_index, PURPOSE_ID_BITS) as u8;
+        let restriction_type =
+            parse_from_bytes(bytes, bit_index + PURPOSE_ID_BITS, RESTRICTION_TYPE_BITS) as u8;
+        let section =
+            parse_vendor_range_from_bytes(bytes, bit_index + 8, &RangeSectionType::Vendor)?;
         bit_index = section.last_bit;
 
         publisher_restrictions.push(PublisherRestriction {
             purpose_id,
-            restriction_type: match restriction_type {
-                0 => PublisherRestrictionType::NotAllowed,
-                1 => PublisherRestrictionType::RequireConsent,
-                2 => PublisherRestrictionType::RequireLegitimateInterest,
-                _ => PublisherRestrictionType::Undefined,
-            },
+            restriction_type: parse_restriction_type(restriction_type),
             vendor_list: if let RangeSectionType::Vendor(vendor_set) = section.value {
                 vendor_set
             } else {
@@ -72,73 +73,99 @@ fn parse_publisher_restrictions_from_bytes(
     })
 }
 
+#[inline]
+fn parse_restriction_type(restriction_type: u8) -> PublisherRestrictionType {
+    match restriction_type {
+        0 => PublisherRestrictionType::NotAllowed,
+        1 => PublisherRestrictionType::RequireConsent,
+        2 => PublisherRestrictionType::RequireLegitimateInterest,
+        _ => PublisherRestrictionType::Undefined,
+    }
+}
+
 fn parse_range_sections_from_bytes(
-    val: &[u8],
-    bit_start: usize,
+    bytes: &[u8],
+    start_bit: usize,
 ) -> Result<Vec<RangeSection>, TcsError> {
-    let max_bit_length = val.len() * 8;
+    let max_bit_length = bytes.len() * MAX_BIT_LENGTH_MULTIPLIER;
     let mut sections: Vec<RangeSection> = Vec::with_capacity(3);
-    let mut start = bit_start;
-    let mut section_index = 0;
+    let mut bit_index = start_bit;
 
-    while start < max_bit_length && section_index < 3 {
+    for section_index in 0..3 {
+        if bit_index >= max_bit_length {
+            break;
+        }
+
         let section = if section_index < 2 {
-            if parse_from_bytes(val, start + 16, 1) == 0 {
-                let max_vendor_id = parse_from_bytes(val, start, 16) as usize;
-                let bitfield_value = parse_u16_bitfield_from_bytes(val, start + 17, max_vendor_id)?;
-
-                RangeSection {
-                    last_bit: start + 17 + max_vendor_id,
-                    value: VENDOR_RANGE_SECTION_TYPES[section_index](bitfield_value),
-                }
-            } else {
-                parse_vendor_range_from_bytes(
-                    val,
-                    start + 17,
-                    &VENDOR_RANGE_SECTION_TYPES[section_index],
-                )?
-            }
+            parse_vendor_section(bytes, bit_index, section_index)?
         } else {
-            parse_publisher_restrictions_from_bytes(val, start)?
+            parse_publisher_restrictions_from_bytes(bytes, bit_index)?
         };
 
-        start = section.last_bit;
-        section_index += 1;
+        bit_index = section.last_bit;
         sections.push(section);
     }
 
     Ok(sections)
 }
 
-fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u16>, TcsError> {
-    let max_vendor_id = parse_from_bytes(val, bit_start, 16) as usize;
+fn parse_vendor_section(
+    bytes: &[u8],
+    start_bit: usize,
+    section_index: usize,
+) -> Result<RangeSection, TcsError> {
+    if parse_from_bytes(bytes, start_bit + 16, SECTION_TYPE_BITS) == 0 {
+        let max_vendor_id = parse_from_bytes(bytes, start_bit, 16) as usize;
+        let bitfield_value = parse_u16_bitfield_from_bytes(bytes, start_bit + 17, max_vendor_id)?;
 
-    Ok(if parse_from_bytes(val, bit_start + 16, 1) == 0 {
-        parse_u16_bitfield_from_bytes(val, bit_start + 17, max_vendor_id)?
-    } else if let RangeSectionType::Vendor(vendor_set) =
-        parse_vendor_range_from_bytes(val, bit_start + 17, &RangeSectionType::Vendor)?.value
-    {
-        vendor_set
+        Ok(RangeSection {
+            last_bit: start_bit + 17 + max_vendor_id,
+            value: VENDOR_RANGE_SECTION_TYPES[section_index](bitfield_value),
+        })
     } else {
-        return Err(TcsError::UnexpectedRangeSection);
-    })
+        parse_vendor_range_from_bytes(
+            bytes,
+            start_bit + 17,
+            &VENDOR_RANGE_SECTION_TYPES[section_index],
+        )
+    }
 }
 
-fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<PublisherTc, TcsError> {
-    let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6) as usize;
+fn parse_vendor_segment_from_bytes(bytes: &[u8], start_bit: usize) -> Result<Vec<u16>, TcsError> {
+    let max_vendor_id = parse_from_bytes(bytes, start_bit, 16) as usize;
+
+    Ok(
+        if parse_from_bytes(bytes, start_bit + 16, SECTION_TYPE_BITS) == 0 {
+            parse_u16_bitfield_from_bytes(bytes, start_bit + 17, max_vendor_id)?
+        } else if let RangeSectionType::Vendor(vendor_set) =
+            parse_vendor_range_from_bytes(bytes, start_bit + 17, &RangeSectionType::Vendor)?.value
+        {
+            vendor_set
+        } else {
+            return Err(TcsError::UnexpectedRangeSection);
+        },
+    )
+}
+
+fn parse_publisher_tc_from_bytes(bytes: &[u8], start_bit: usize) -> Result<PublisherTc, TcsError> {
+    let custom_purposes_count = parse_from_bytes(bytes, start_bit + 48, 6) as usize;
 
     Ok(PublisherTc {
-        publisher_purposes_consent: parse_u8_bitfield_from_bytes(val, bit_start, 24)?,
-        publisher_purposes_li_transparency: parse_u8_bitfield_from_bytes(val, bit_start + 24, 24)?,
+        publisher_purposes_consent: parse_u8_bitfield_from_bytes(bytes, start_bit, 24)?,
+        publisher_purposes_li_transparency: parse_u8_bitfield_from_bytes(
+            bytes,
+            start_bit + 24,
+            24,
+        )?,
         custom_purposes_consent: if custom_purposes_count > 0 {
-            parse_u8_bitfield_from_bytes(val, bit_start + 54, custom_purposes_count)?
+            parse_u8_bitfield_from_bytes(bytes, start_bit + 54, custom_purposes_count)?
         } else {
             vec![]
         },
         custom_purposes_li_transparency: if custom_purposes_count > 0 {
             parse_u8_bitfield_from_bytes(
-                val,
-                bit_start + 54 + custom_purposes_count,
+                bytes,
+                start_bit + 54 + custom_purposes_count,
                 custom_purposes_count,
             )?
         } else {
@@ -147,14 +174,14 @@ fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<Publish
     })
 }
 
-fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TcSegment, TcsError> {
+fn parse_tc_segments_from_slice(segments_slice: &[Vec<u8>]) -> Result<TcSegment, TcsError> {
     let mut tc_segment = TcSegment {
         disclosed_vendors: None,
         allowed_vendors: None,
         publisher_tc: None,
     };
 
-    for segment in val {
+    for segment in segments_slice {
         let segment_bytes = segment.as_slice();
 
         match parse_from_bytes(segment_bytes, 0, 3) {
@@ -200,13 +227,13 @@ impl TryFrom<&str> for TcModelV2 {
 }
 
 impl TcModelV2 {
-    fn try_from_vec(val: Vec<Vec<u8>>) -> Result<Self, TcsError> {
-        let core_segment = val[0].as_slice();
+    fn try_from_vec(segments: Vec<Vec<u8>>) -> Result<Self, TcsError> {
+        let core_segment = segments[0].as_slice();
 
-        byte_list_bit_boundary_check!(core_segment, 213);
+        byte_list_bit_boundary_check(core_segment, 213)?;
 
         let mut core_sections = parse_range_sections_from_bytes(core_segment, 213)?;
-        let segments = parse_tc_segments_from_slice(&val[1..])?;
+        let segments = parse_tc_segments_from_slice(&segments[1..])?;
         let publisher_segment = segments.publisher_tc.unwrap_or_default();
 
         Ok(Self {

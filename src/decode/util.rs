@@ -42,7 +42,7 @@ pub(crate) fn parse_string_from_bytes(
     bit_width: usize,
     char_count: usize,
 ) -> Result<String, TcsError> {
-    byte_list_bit_boundary_check!(val, bit_start + (char_count * bit_width));
+    byte_list_bit_boundary_check(val, bit_start + (char_count * bit_width))?;
 
     let mut result = String::with_capacity(char_count);
     let mut offset = 0;
@@ -68,7 +68,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
 ) -> Result<RangeSection, TcsError> {
     let mut bit_index = bit_start + 12;
 
-    byte_list_bit_boundary_check!(val, bit_index);
+    byte_list_bit_boundary_check(val, bit_index)?;
 
     let num_entries = parse_from_bytes(val, bit_start, 12) as u16;
     let mut entry_list: Vec<u16> = Vec::new();
@@ -76,7 +76,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
     while count < num_entries {
         if parse_from_bytes(val, bit_index, 1) as u8 == 1 {
-            byte_list_bit_boundary_check!(val, bit_index + 33);
+            byte_list_bit_boundary_check(val, bit_index + 33)?;
 
             let start_vendor_id = parse_from_bytes(val, bit_index + 1, 16) as u16;
             let end_vendor_id = parse_from_bytes(val, bit_index + 17, 16) as u16;
@@ -87,7 +87,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
             bit_index += 33;
         } else {
-            byte_list_bit_boundary_check!(val, bit_index + 17);
+            byte_list_bit_boundary_check(val, bit_index + 17)?;
 
             entry_list.push(parse_from_bytes(val, bit_index + 1, 16) as u16);
             bit_index += 17;
@@ -100,6 +100,18 @@ pub(crate) fn parse_vendor_range_from_bytes(
         last_bit: bit_index,
         value: value_type(entry_list),
     })
+}
+
+#[inline]
+pub(crate) fn byte_list_bit_boundary_check<T>(slice: &[T], bit_index: usize) -> Result<(), TcsError>
+where
+    T: Sized,
+{
+    if slice.len() * 8 < bit_index {
+        return Err(TcsError::InsufficientLength);
+    }
+
+    Ok(())
 }
 
 parse_bitfield_from_bytes!(parse_u8_bitfield_from_bytes, u8);
