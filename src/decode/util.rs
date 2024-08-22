@@ -2,6 +2,7 @@ use crate::decode::{
     error::TcsError,
     model::{RangeSection, RangeSectionType},
 };
+use std::collections::BTreeSet;
 
 pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length: usize) -> u64 {
     let first_byte_start_bit = (absolute_start_bit % 8) as u8;
@@ -64,14 +65,14 @@ pub(crate) fn parse_string_from_bytes(
 pub(crate) fn parse_vendor_range_from_bytes(
     val: &[u8],
     bit_start: usize,
-    value_type: &dyn Fn(Vec<u16>) -> RangeSectionType,
+    value_type: &fn(BTreeSet<u16>) -> RangeSectionType,
 ) -> Result<RangeSection, TcsError> {
     let mut bit_index = bit_start + 12;
 
     byte_list_bit_boundary_check(val, bit_index)?;
 
     let num_entries = parse_from_bytes(val, bit_start, 12) as u16;
-    let mut entry_list: Vec<u16> = Vec::new();
+    let mut entry_list = BTreeSet::<u16>::new();
     let mut count = 0u16;
 
     while count < num_entries {
@@ -82,14 +83,14 @@ pub(crate) fn parse_vendor_range_from_bytes(
             let end_vendor_id = parse_from_bytes(val, bit_index + 17, 16) as u16;
 
             for vendor_id in start_vendor_id..end_vendor_id + 1 {
-                entry_list.push(vendor_id);
+                entry_list.insert(vendor_id);
             }
 
             bit_index += 33;
         } else {
             byte_list_bit_boundary_check(val, bit_index + 17)?;
 
-            entry_list.push(parse_from_bytes(val, bit_index + 1, 16) as u16);
+            entry_list.insert(parse_from_bytes(val, bit_index + 1, 16) as u16);
             bit_index += 17;
         }
 

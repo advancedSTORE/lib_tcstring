@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 /// Contains restriction types as defined in [`Vendor Consent String Format V2 Core String`]
 ///
 /// [`Vendor Consent String Format V2 Core String`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/81a3b9ed1545148be380b4408e6361cd2294446d/TCFv2/IAB%20Tech%20Lab%20-%20Consent%20string%20and%20vendor%20list%20formats%20v2.md#the-core-string
@@ -114,11 +116,11 @@ pub struct TcModelV2 {
     /// List of opted-in "Special Features"
     ///
     /// "Special Features" are numerically identified in the global vendor list separately from normal features
-    pub special_feature_opt_ins: Vec<u8>,
+    pub special_feature_opt_ins: BTreeSet<u8>,
     /// List of allowed purposes
-    pub purposes_consent: Vec<u8>,
+    pub purposes_consent: BTreeSet<u8>,
     /// List of allowed "Legitimate Interest" purposes
-    pub purposes_li_transparency: Vec<u8>,
+    pub purposes_li_transparency: BTreeSet<u8>,
     /// `true` means "Purpose 1" was not disclosed
     ///
     /// `false` means "Purpose 1" was disclosed commonly as consent
@@ -128,9 +130,9 @@ pub struct TcModelV2 {
     /// [`ISO 3166-1 alpha-2`]: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
     pub publisher_country_code: String,
     /// List of allowed vendors
-    pub vendors_consent: Vec<u16>,
+    pub vendors_consent: BTreeSet<u16>,
     /// List of vendors "Legitimate Interest" disclosures
-    pub vendors_li_consent: Vec<u16>,
+    pub vendors_li_consent: BTreeSet<u16>,
     /// List of publisher restrictions on a per-purpose basis
     ///
     /// See [`PublisherRestriction`] for more details
@@ -138,17 +140,17 @@ pub struct TcModelV2 {
     /// [`PublisherRestriction`]: struct.PublisherRestriction.html
     pub publisher_restrictions: Vec<PublisherRestriction>,
     /// List of vendors that have been disclosed to a given user by a CMP
-    pub disclosed_vendors: Vec<u16>,
+    pub disclosed_vendors: BTreeSet<u16>,
     /// List of vendors the publisher permits using OOB legal bases
-    pub allowed_vendors: Vec<u16>,
+    pub allowed_vendors: BTreeSet<u16>,
     /// List of purposes which are established on the legal basis of consent, for the publisher
-    pub publisher_purposes_consent: Vec<u8>,
+    pub publisher_purposes_consent: BTreeSet<u8>,
     /// List of purposes which are established on the legal basis of "Legitimate Interest" and the user has not exercised their “Right to Object”
-    pub publisher_purposes_li_transparency: Vec<u8>,
+    pub publisher_purposes_li_transparency: BTreeSet<u8>,
     /// List of allowed custom purposes, for the publisher
-    pub custom_purposes_consent: Vec<u8>,
+    pub custom_purposes_consent: BTreeSet<u8>,
     /// List of custom purposes which are established on the legal basis of "Legitimate Interest"
-    pub custom_purposes_li_transparency: Vec<u8>,
+    pub custom_purposes_li_transparency: BTreeSet<u8>,
 }
 
 /// Publisher restriction which overrides the specified purpose
@@ -162,20 +164,20 @@ pub struct PublisherRestriction {
     /// [`PublisherRestrictionType`]: enum.PublisherRestrictionType.html
     pub restriction_type: PublisherRestrictionType,
     /// List of relevant vendors
-    pub vendor_list: Vec<u16>,
+    pub vendor_list: BTreeSet<u16>,
 }
 
 #[cfg_attr(test, derive(Debug))]
 pub(crate) enum RangeSectionType {
-    Vendor(Vec<u16>),
-    VendorLegitimateInterest(Vec<u16>),
+    Vendor(BTreeSet<u16>),
+    VendorLegitimateInterest(BTreeSet<u16>),
     PublisherRestriction(Vec<PublisherRestriction>),
 }
 
 #[cfg_attr(test, derive(Debug))]
 pub(crate) struct TcSegment {
-    pub disclosed_vendors: Option<Vec<u16>>,
-    pub allowed_vendors: Option<Vec<u16>>,
+    pub disclosed_vendors: Option<BTreeSet<u16>>,
+    pub allowed_vendors: Option<BTreeSet<u16>>,
     pub publisher_tc: Option<PublisherTc>,
 }
 
@@ -188,10 +190,10 @@ pub(crate) struct RangeSection {
 #[cfg_attr(test, derive(Debug))]
 #[derive(Default)]
 pub(crate) struct PublisherTc {
-    pub publisher_purposes_consent: Vec<u8>,
-    pub publisher_purposes_li_transparency: Vec<u8>,
-    pub custom_purposes_consent: Vec<u8>,
-    pub custom_purposes_li_transparency: Vec<u8>,
+    pub publisher_purposes_consent: BTreeSet<u8>,
+    pub publisher_purposes_li_transparency: BTreeSet<u8>,
+    pub custom_purposes_consent: BTreeSet<u8>,
+    pub custom_purposes_li_transparency: BTreeSet<u8>,
 }
 
 impl Default for PublisherRestrictionType {
