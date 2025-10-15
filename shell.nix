@@ -11,8 +11,8 @@ in
     ];
 
     nativeBuildInputs = [ pkgs.pkg-config ];
-    buildInputs = [ pkgs.openssl_3_3 ];
+    buildInputs = [ pkgs.openssl_3 ];
 
     RUST_SRC_PATH = pkgs.rust-bin.stable.latest.rust-src;
-    LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.openssl_3_3 ];
+    LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.openssl_3 ];
   }
