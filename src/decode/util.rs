@@ -3,7 +3,24 @@ use crate::decode::{
     model::{RangeSection, RangeSectionType},
 };
 
-pub const VENDOR_ID_NUMBER_LIMIT: usize = 65536;
+/// Maximum number of vendor IDs one range-encoded section may expand to.
+///
+/// Range entries are cheap to encode (33 bits for up to 65,535 IDs), so an
+/// untrusted TC string can otherwise request hundreds of millions of IDs.
+/// This caps the work and memory a single string can cause (DEV-11330).
+///
+/// * Vendor consent, vendor LI, Disclosed Vendors and Allowed Vendors: the
+///   limit applies to each section's expanded vendor list.
+/// * Publisher restrictions: the section has no `MaxVendorId`, so the limit
+///   applies to the sum of all restrictions' vendor lists. The total is
+///   checked after each restriction is expanded, so peak memory before
+///   rejection is at most about twice the limit.
+///
+/// 65,536 is one full set of 16-bit vendor IDs, so it is never smaller than
+/// any `MaxVendorId` and is far above what real CMPs produce
+/// (about 11 purposes × the size of the Global Vendor List). With `u16` IDs
+/// this is about 128 KB per section.
+pub(crate) const VENDOR_ID_NUMBER_LIMIT: usize = 65536;
 
 pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length: usize) -> u64 {
     let first_byte_start_bit = (absolute_start_bit % 8) as u8;
@@ -126,22 +143,16 @@ fn precount_entry_list(
             validate_range_vendor_id(start_vendor_id, end_vendor_id, max_vendor_id)?;
 
             entry_count += usize::from(end_vendor_id - start_vendor_id) + 1;
-
-            if VENDOR_ID_NUMBER_LIMIT < entry_count {
-                return Err(TcsError::InvalidSectionDefinition);
-            }
-
             bit_index += 33;
         } else {
             byte_list_bit_boundary_check!(val, bit_index + 17);
 
             entry_count += 1;
-
-            if VENDOR_ID_NUMBER_LIMIT < entry_count {
-                return Err(TcsError::InvalidSectionDefinition);
-            }
-
             bit_index += 17;
+        }
+
+        if entry_count > VENDOR_ID_NUMBER_LIMIT {
+            return Err(TcsError::InvalidSectionDefinition);
         }
 
         count += 1;
@@ -188,13 +199,15 @@ pub(crate) mod test_support {
         /// Appends the lowest `width` bits of `value`.
         pub(crate) fn push(&mut self, value: u64, width: usize) -> &mut Self {
             for i in (0..width).rev() {
-                if self.bit_len % 8 == 0 {
+                let bit_in_byte = self.bit_len % 8;
+
+                if bit_in_byte == 0 {
                     self.bytes.push(0);
                 }
 
                 if (value >> i) & 1 == 1 {
                     let last = self.bytes.len() - 1;
-                    self.bytes[last] |= 0x80 >> (self.bit_len % 8);
+                    self.bytes[last] |= 0x80 >> bit_in_byte;
                 }
 
                 self.bit_len += 1;
