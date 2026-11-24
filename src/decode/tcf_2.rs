@@ -10,7 +10,7 @@ use crate::decode::{
     },
     util::{
         parse_from_bytes, parse_string_from_bytes, parse_u16_bitfield_from_bytes,
-        parse_u8_bitfield_from_bytes, parse_vendor_range_from_bytes,
+        parse_u8_bitfield_from_bytes, parse_vendor_range_from_bytes, VENDOR_ID_NUMBER_LIMIT,
     },
 };
 
@@ -38,15 +38,30 @@ fn parse_publisher_restrictions_from_bytes(
         Vec::with_capacity(restriction_count);
     let mut index: usize = 0;
     let mut bit_index = bit_start + 12;
+    let mut used = 0usize;
 
     while index < restriction_count {
         byte_list_bit_boundary_check!(val, bit_index + 8);
 
         let purpose_id = parse_from_bytes(val, bit_index, 6) as u8;
         let restriction_type = parse_from_bytes(val, bit_index + 6, 2) as u8;
-        let section = parse_vendor_range_from_bytes(val, bit_index + 8, &RangeSectionType::Vendor)?;
+        let section =
+            parse_vendor_range_from_bytes(val, bit_index + 8, &RangeSectionType::Vendor, None)?;
 
         bit_index = section.last_bit;
+
+        let vendor_set: Vec<u16> = match section.value {
+            RangeSectionType::Vendor(vendor_set) => {
+                used += vendor_set.len();
+
+                vendor_set
+            }
+            _ => return Err(TcsError::InvalidSectionDefinition),
+        };
+
+        if used > VENDOR_ID_NUMBER_LIMIT {
+            return Err(TcsError::InvalidSectionDefinition);
+        }
 
         publisher_restrictions.push(PublisherRestriction {
             purpose_id,
@@ -56,11 +71,7 @@ fn parse_publisher_restrictions_from_bytes(
                 2 => PublisherRestrictionType::RequireLegitimateInterest,
                 _ => PublisherRestrictionType::Undefined,
             },
-            vendor_list: if let RangeSectionType::Vendor(vendor_set) = section.value {
-                vendor_set
-            } else {
-                return Err(TcsError::InvalidSectionDefinition);
-            },
+            vendor_list: vendor_set,
         });
 
         index += 1;
@@ -83,8 +94,8 @@ fn parse_range_sections_from_bytes(
 
     while start < max_bit_length && section_index < 3 {
         let section = if section_index < 2 {
+            let max_vendor_id = parse_from_bytes(val, start, 16) as usize;
             if parse_from_bytes(val, start + 16, 1) == 0 {
-                let max_vendor_id = parse_from_bytes(val, start, 16) as usize;
                 let bitfield_value = parse_u16_bitfield_from_bytes(val, start + 17, max_vendor_id)?;
 
                 RangeSection {
@@ -96,6 +107,7 @@ fn parse_range_sections_from_bytes(
                     val,
                     start + 17,
                     &VENDOR_RANGE_SECTION_TYPES[section_index],
+                    Some(max_vendor_id as u16),
                 )?
             }
         } else {
@@ -111,12 +123,17 @@ fn parse_range_sections_from_bytes(
 }
 
 fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u16>, TcsError> {
-    let max_vendor_id = parse_from_bytes(val, bit_start, 16) as usize;
+    let max_vendor_id = parse_from_bytes(val, bit_start, 16) as u16;
 
     Ok(if parse_from_bytes(val, bit_start + 16, 1) == 0 {
-        parse_u16_bitfield_from_bytes(val, bit_start + 17, max_vendor_id)?
-    } else if let RangeSectionType::Vendor(vendor_set) =
-        parse_vendor_range_from_bytes(val, bit_start + 17, &RangeSectionType::Vendor)?.value
+        parse_u16_bitfield_from_bytes(val, bit_start + 17, max_vendor_id as usize)?
+    } else if let RangeSectionType::Vendor(vendor_set) = parse_vendor_range_from_bytes(
+        val,
+        bit_start + 17,
+        &RangeSectionType::Vendor,
+        Some(max_vendor_id),
+    )?
+    .value
     {
         vendor_set
     } else {
@@ -696,5 +713,195 @@ mod tests {
                 custom_purposes_li_transparency: vec![],
             })
         );
+    }
+
+    // DEV-11330: bounded vendor range expansion
+
+    use crate::decode::util::test_support::{assert_invalid_section, BitWriter};
+
+    /// Builds the three core range sections, starting at bit 0:
+    /// vendor consent (range-encoded with `entries`), an empty vendor LI
+    /// bitfield, and zero publisher restrictions.
+    fn core_range_sections(max_vendor_id: u16, entries: &[(u16, u16)]) -> Vec<u8> {
+        let mut writer = BitWriter::new();
+
+        // Vendor consent: MaxVendorId, IsRangeEncoding = 1, NumEntries, entries
+        writer
+            .push(u64::from(max_vendor_id), 16)
+            .push(1, 1)
+            .push(entries.len() as u64, 12);
+        for &(start, end) in entries {
+            writer.range(start, end);
+        }
+
+        // Vendor LI: MaxVendorId = 0, IsRangeEncoding = 0 (empty bitfield)
+        writer.push(0, 16).push(0, 1);
+
+        // Publisher restrictions: NumPubRestrictions = 0
+        writer.push(0, 12);
+
+        writer.to_bytes()
+    }
+
+    /// Builds a Disclosed or Allowed Vendors segment body (without the
+    /// 3-bit segment type), starting at bit 0.
+    fn vendor_segment(max_vendor_id: u16, entries: &[(u16, u16)]) -> Vec<u8> {
+        let mut writer = BitWriter::new();
+
+        writer
+            .push(u64::from(max_vendor_id), 16)
+            .push(1, 1)
+            .push(entries.len() as u64, 12);
+        for &(start, end) in entries {
+            writer.range(start, end);
+        }
+
+        writer.to_bytes()
+    }
+
+    /// Builds a publisher restrictions section where every restriction
+    /// holds the same single range entry.
+    fn publisher_restrictions(restriction_count: u16, start: u16, end: u16) -> Vec<u8> {
+        let mut writer = BitWriter::new();
+
+        writer.push(u64::from(restriction_count), 12);
+        for _ in 0..restriction_count {
+            // PurposeId = 1, RestrictionType = 1 (RequireConsent), NumEntries = 1
+            writer.push(1, 6).push(1, 2).push(1, 12).range(start, end);
+        }
+
+        writer.to_bytes()
+    }
+
+    #[test]
+    fn core_vendor_range_valid_entries_decode_unchanged() {
+        let bytes = core_range_sections(10, &[(2, 2), (5, 8)]);
+        let mut sections = parse_range_sections_from_bytes(&bytes, 0).unwrap();
+
+        match sections.remove(0).value {
+            RangeSectionType::Vendor(ids) => assert_eq!(ids, vec![2, 5, 6, 7, 8]),
+            other => panic!("unexpected section type: {:?}", other),
+        }
+    }
+
+    #[test]
+    fn core_vendor_range_end_greater_than_max_is_rejected() {
+        let bytes = core_range_sections(10, &[(1, 11)]);
+
+        assert_invalid_section(parse_range_sections_from_bytes(&bytes, 0));
+    }
+
+    #[test]
+    fn core_vendor_range_start_greater_than_end_is_rejected() {
+        let bytes = core_range_sections(10, &[(8, 5)]);
+
+        assert_invalid_section(parse_range_sections_from_bytes(&bytes, 0));
+    }
+
+    #[test]
+    fn core_vendor_range_reproducer_is_rejected() {
+        // 4095 entries of 1..=65534 with MaxVendorId 65534 would expand to
+        // about 268M vendor IDs (about 536 MB) without a total cap
+        let entries = vec![(1u16, 65534u16); 4095];
+        let bytes = core_range_sections(65534, &entries);
+
+        assert_invalid_section(parse_range_sections_from_bytes(&bytes, 0));
+    }
+
+    #[test]
+    fn disclosed_allowed_vendors_end_greater_than_max_is_rejected() {
+        let bytes = vendor_segment(10, &[(1, 11)]);
+
+        assert_invalid_section(parse_vendor_segment_from_bytes(&bytes, 0));
+    }
+
+    #[test]
+    fn disclosed_allowed_vendors_start_greater_than_end_is_rejected() {
+        let bytes = vendor_segment(10, &[(8, 5)]);
+
+        assert_invalid_section(parse_vendor_segment_from_bytes(&bytes, 0));
+    }
+
+    #[test]
+    fn disclosed_allowed_vendors_valid_range_decodes() {
+        let bytes = vendor_segment(10, &[(3, 7)]);
+
+        assert_eq!(
+            parse_vendor_segment_from_bytes(&bytes, 0),
+            Ok(vec![3, 4, 5, 6, 7])
+        );
+    }
+
+    #[test]
+    fn publisher_restriction_start_greater_than_end_is_rejected() {
+        let bytes = publisher_restrictions(1, 8, 5);
+
+        assert_invalid_section(parse_publisher_restrictions_from_bytes(&bytes, 0));
+    }
+
+    #[test]
+    fn publisher_restriction_ids_are_not_bound_by_core_max_vendor_id() {
+        // The spec allows publisher restrictions to list IDs above the core
+        // MaxVendorId (deleted vendors, gaps in GVL IDs)
+        let bytes = publisher_restrictions(1, 900, 905);
+        let section = parse_publisher_restrictions_from_bytes(&bytes, 0).unwrap();
+
+        match section.value {
+            RangeSectionType::PublisherRestriction(restrictions) => {
+                assert_eq!(restrictions.len(), 1);
+                assert_eq!(
+                    restrictions[0].vendor_list,
+                    vec![900, 901, 902, 903, 904, 905]
+                );
+            }
+            other => panic!("unexpected section type: {:?}", other),
+        }
+    }
+
+    #[test]
+    fn publisher_restrictions_total_expansion_is_capped() {
+        // 4095 restrictions, each 1..=65534, would expand to about 268M IDs
+        // in total. The cap must apply to the whole section, not per restriction
+        let bytes = publisher_restrictions(4095, 1, 65534);
+
+        assert_invalid_section(parse_publisher_restrictions_from_bytes(&bytes, 0));
+    }
+
+    /// Builds a publisher restrictions section with one range entry per
+    /// restriction, taken from `ranges`.
+    fn publisher_restrictions_with_ranges(ranges: &[(u16, u16)]) -> Vec<u8> {
+        let mut writer = BitWriter::new();
+
+        writer.push(ranges.len() as u64, 12);
+        for &(start, end) in ranges {
+            // PurposeId = 1, RestrictionType = 1 (RequireConsent), NumEntries = 1
+            writer.push(1, 6).push(1, 2).push(1, 12).range(start, end);
+        }
+
+        writer.to_bytes()
+    }
+
+    #[test]
+    fn publisher_restrictions_exactly_at_the_section_limit_decode() {
+        // 2 × 32,768 IDs = 65,536 = VENDOR_ID_NUMBER_LIMIT across the section
+        let bytes = publisher_restrictions_with_ranges(&[(0, 32767), (0, 32767)]);
+        let section = parse_publisher_restrictions_from_bytes(&bytes, 0).unwrap();
+
+        match section.value {
+            RangeSectionType::PublisherRestriction(restrictions) => {
+                let total: usize = restrictions.iter().map(|r| r.vendor_list.len()).sum();
+                assert_eq!(restrictions.len(), 2);
+                assert_eq!(total, VENDOR_ID_NUMBER_LIMIT);
+            }
+            other => panic!("unexpected section type: {:?}", other),
+        }
+    }
+
+    #[test]
+    fn publisher_restrictions_one_id_past_the_section_limit_is_rejected() {
+        // Each restriction is under the limit on its own; only the sum is over
+        let bytes = publisher_restrictions_with_ranges(&[(0, 32767), (0, 32767), (1, 1)]);
+
+        assert_invalid_section(parse_publisher_restrictions_from_bytes(&bytes, 0));
     }
 }
