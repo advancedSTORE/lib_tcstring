@@ -87,7 +87,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
             let start_vendor_id = parse_from_bytes(val, bit_index + 1, 16)? as u16;
             let end_vendor_id = parse_from_bytes(val, bit_index + 17, 16)? as u16;
 
-            for vendor_id in start_vendor_id..end_vendor_id + 1 {
+            for vendor_id in start_vendor_id..=end_vendor_id {
                 entry_list.push(vendor_id);
             }
 
@@ -110,3 +110,86 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
 parse_bitfield_from_bytes!(parse_u8_bitfield_from_bytes, u8);
 parse_bitfield_from_bytes!(parse_u16_bitfield_from_bytes, u16);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn vendor_list(section: RangeSection) -> Vec<u16> {
+        match section.value {
+            RangeSectionType::Vendor(list) => list,
+            _ => panic!("expected RangeSectionType::Vendor"),
+        }
+    }
+
+    #[test]
+    fn parse_from_bytes_reads_up_to_last_bit() {
+        assert_eq!(parse_from_bytes(&[0xff], 0, 8), Ok(0xff));
+        assert_eq!(parse_from_bytes(&[0xab, 0xcd], 4, 8), Ok(0xbc));
+        assert_eq!(parse_from_bytes(&[0xab, 0xcd], 15, 1), Ok(1));
+    }
+
+    #[test]
+    fn parse_from_bytes_past_end_returns_err() {
+        assert_eq!(
+            parse_from_bytes(&[], 0, 1),
+            Err(TcsError::InsufficientLength)
+        );
+        assert_eq!(
+            parse_from_bytes(&[0xff], 1, 8),
+            Err(TcsError::InsufficientLength)
+        );
+        assert_eq!(
+            parse_from_bytes(&[0xff], 8, 1),
+            Err(TcsError::InsufficientLength)
+        );
+        assert_eq!(
+            parse_from_bytes(&[0xff, 0xff], 0, 17),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// NumEntries = 1 occupies bits 4..16; the IsARange bit at 16 is missing.
+    #[test]
+    fn vendor_range_missing_is_a_range_bit_returns_err() {
+        assert_eq!(
+            parse_vendor_range_from_bytes(&[0x00, 0x01], 4, &RangeSectionType::Vendor).err(),
+            Some(TcsError::InsufficientLength)
+        );
+    }
+
+    /// NumEntries = 1, IsARange = 1, but StartOrOnlyVendorId / EndVendorId cut short.
+    #[test]
+    fn vendor_range_truncated_range_entry_returns_err() {
+        assert_eq!(
+            parse_vendor_range_from_bytes(&[0x00, 0x1f, 0xff], 0, &RangeSectionType::Vendor).err(),
+            Some(TcsError::InsufficientLength)
+        );
+    }
+
+    /// NumEntries = 1, IsARange = 1, Start = 65534, End = 65535.
+    #[test]
+    fn vendor_range_ending_at_u16_max_includes_65535() {
+        let section = parse_vendor_range_from_bytes(
+            &[0x00, 0x1f, 0xff, 0xf7, 0xff, 0xf8],
+            0,
+            &RangeSectionType::Vendor,
+        )
+        .expect("range ending at 65535 must decode");
+
+        assert_eq!(section.last_bit, 45);
+        assert_eq!(vendor_list(section), vec![65534, 65535]);
+    }
+
+    #[test]
+    fn bitfield_past_end_returns_err() {
+        assert_eq!(
+            parse_u16_bitfield_from_bytes(&[0xff], 0, 9),
+            Err(TcsError::InsufficientLength)
+        );
+        assert_eq!(
+            parse_u8_bitfield_from_bytes(&[0xff], 4, 5),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+}

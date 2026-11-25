@@ -701,4 +701,134 @@ mod tests {
             })
         );
     }
+
+    /// Valid core string reused as the base for segment reproducers.
+    const VALID_CORE: &str = "COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA";
+
+    /// Every valid TC string exercised by the tests above.
+    const VALID_TC_STRINGS: &[&str] = &[
+        "COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA",
+        "COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.YAAAAAAAAAAAAAAAAAA",
+        "COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.YAAAAAAAAAAAAAAAAAA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA",
+        "CGL23UdMFJzvuA9ACCENAXCEAC0AAGrAAA5YA5ht7-_d_7_vd-f-nrf4_4A4hM4JCKoK4YhmAqABgAEgAA",
+        "COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA.IFoEUQQgAIQwgIwQABAEAAAAOIAACAIAAAAQAIAgEAACEAAAAAgAQBAAAAAAAGBAAgAAAAAAAFAAECAAAgAAQARAEQAAAAAJAAIAAgAAAYQEAAAQmAgBC3ZAYzUw",
+        "COw4XqLOw4XqLAAAAAENAXCAAP-gAAAfwIAAACngAI8AAA.cAEAPAAAC7gAHw4AAA",
+        "COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AEFABgACAA4A.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA",
+        "CO51ctPO51ctPCnABBDEA3CsAP_AAAAAAAYgGkNf_X_fb2vj-_5999t0eY1f9_63v-wzjgeNs-8Nyd_X_L4Xr2MyvB36pq4KuR4Eu3LBAQdlHOHcTQmQwIkVqTLsbk2Mq7NKJ7LEilMbM2dYGH9vn9XTuZCY70_sf__z_3-_-___67f-L2wAAADhIBQAFQAQAA0ACYAE8ARwAtwB-gIvAXmKgBgBMAEcAvMZADACYAI4BeY6AaABUAEAANAAmABPAEcAJgAW4A_QCLAIvAXmAxglAFACYAI4AW4CLwF5lIBYAFQAQAA0ACYAE8AW4A_QCLAIvAXmAxghACACYAI4.f_gAAAAAAWAA",
+        "COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AIFABgACAA4SADAAgADQ.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA",
+        "CO4yYChO4yYChCnABBDEA0CsAP_AAAAAAAYgF-wDwAUAB6AEaAK4AaYA5AC6gH_ARqAkEBQ4CuwFvgLsAX6AAAAYJABAXmKgAgLzGQAQF5joAIC8yUAEBeZSACAvMAAA.f_gAAAAAAQAA",
+        "CO-Z5geO-Z5geAfbgBDEBECoAP_AAH_AAAigGfwFgADAAZABOACoAFgAMgAiAB-AERAIwAjQBMAEWAJwAXMAzgCCgEtALaAXmAxEBmgDPwM_gLAAGAAyACcAFQALAAZABEAD8AIiARgBGgCYAIsATgAuYBnAEFAJaAW0AvMBiIDNAGfgAA",
+    ];
+
+    /// Reproducer 1: Disclosed Vendors segment with only the 3-bit SegmentType
+    /// (MaxVendorId / IsRangeEncoding missing).
+    #[test]
+    fn truncated_disclosed_vendors_segment_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.IA", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Same as reproducer 1, but for the Allowed Vendors segment (type 2).
+    #[test]
+    fn truncated_allowed_vendors_segment_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.QA", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 2: Publisher TC segment with only the 3-bit SegmentType
+    /// (NumCustomPurposes missing).
+    #[test]
+    fn truncated_publisher_tc_segment_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.cA", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 3: core string cut right after the vendor-consent section,
+    /// leaving fewer bits than the vendor-LI section header needs.
+    #[test]
+    fn core_cut_after_vendor_consent_section_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAAA"),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 4: range-encoded Disclosed Vendors segment declaring
+    /// NumEntries = 1 that ends exactly where the IsARange bit would be read.
+    /// Bits: SegmentType=1, MaxVendorId=5, IsRangeEncoding=1, NumEntries=1.
+    #[test]
+    fn missing_is_a_range_bit_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.IACwAQ", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 5: vendor-consent range entry 65535..=65535 must decode to
+    /// [65535] (debug: no overflow panic, release: vendor not dropped).
+    #[test]
+    fn range_entry_ending_at_u16_max_includes_65535() {
+        let model = TcModelV2::try_from("CAAAAABAAAAABABABAENABEAAAAAAAAAAAAH__wAf____-AAAAA")
+            .expect("range ending at 65535 must decode");
+
+        assert_eq!(model.vendors_consent, vec![65535]);
+        assert!(model.vendors_li_consent.is_empty());
+        assert!(model.publisher_restrictions.is_empty());
+    }
+
+    /// Every character prefix of every valid TC string must decode without panicking.
+    #[test]
+    fn every_string_prefix_never_panics() {
+        for tc_string in VALID_TC_STRINGS {
+            for end in 0..=tc_string.len() {
+                let prefix = &tc_string[..end];
+                let result = std::panic::catch_unwind(|| TcModelV2::try_from(prefix));
+
+                assert!(
+                    result.is_ok(),
+                    "panicked on prefix of length {}: {:?}",
+                    end,
+                    prefix
+                );
+            }
+        }
+    }
+
+    /// Every byte-level truncation of every decoded segment must decode without
+    /// panicking. Base64 prefixes move in 6-bit steps and many are rejected as
+    /// invalid base64, so this reaches boundaries the string prefix test cannot.
+    #[test]
+    fn every_byte_truncation_never_panics() {
+        for tc_string in VALID_TC_STRINGS {
+            let segments: Vec<Vec<u8>> = tc_string
+                .split('.')
+                .map(|s| BASE64_ENGINE.decode(s).expect("valid test string"))
+                .collect();
+
+            for segment_index in 0..segments.len() {
+                for len in 0..segments[segment_index].len() {
+                    let mut truncated = segments.clone();
+
+                    truncated[segment_index].truncate(len);
+
+                    let result =
+                        std::panic::catch_unwind(move || TcModelV2::try_from_vec(truncated));
+
+                    assert!(
+                        result.is_ok(),
+                        "panicked on {:?}: segment {} truncated to {} bytes",
+                        tc_string,
+                        segment_index,
+                        len
+                    );
+                }
+            }
+        }
+    }
 }
