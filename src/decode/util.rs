@@ -3,7 +3,13 @@ use crate::decode::{
     model::{RangeSection, RangeSectionType},
 };
 
-pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length: usize) -> u64 {
+pub(crate) fn parse_from_bytes(
+    val: &[u8],
+    absolute_start_bit: usize,
+    bit_length: usize,
+) -> Result<u64, TcsError> {
+    byte_list_bit_boundary_check!(val, absolute_start_bit + bit_length);
+
     let first_byte_start_bit = (absolute_start_bit % 8) as u8;
     let relative_end_bit = bit_length - 1;
     let absolute_end_bit = absolute_start_bit + relative_end_bit;
@@ -20,7 +26,7 @@ pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length
     let mut return_value = (val[current_byte] as u64 & bit_mask) >> remaining_bits_in_first_byte;
 
     if current_byte >= last_byte_index {
-        return return_value;
+        return Ok(return_value);
     }
 
     current_byte += 1;
@@ -32,8 +38,8 @@ pub(crate) fn parse_from_bytes(val: &[u8], absolute_start_bit: usize, bit_length
 
     let bit_shift = 7 - last_byte_end_bit;
 
-    (return_value << (last_byte_end_bit + 1))
-        | ((val[current_byte] as u64 & (0xff << bit_shift)) >> bit_shift)
+    Ok((return_value << (last_byte_end_bit + 1))
+        | ((val[current_byte] as u64 & (0xff << bit_shift)) >> bit_shift))
 }
 
 pub(crate) fn parse_string_from_bytes(
@@ -48,7 +54,7 @@ pub(crate) fn parse_string_from_bytes(
     let mut offset = 0;
 
     for _ in 0..char_count {
-        let alphabet_offset = parse_from_bytes(val, bit_start + offset, bit_width) as u8;
+        let alphabet_offset = parse_from_bytes(val, bit_start + offset, bit_width)? as u8;
 
         if alphabet_offset > 25 {
             return Err(TcsError::InvalidAlphabetOffset);
@@ -70,16 +76,16 @@ pub(crate) fn parse_vendor_range_from_bytes(
 
     byte_list_bit_boundary_check!(val, bit_index);
 
-    let num_entries = parse_from_bytes(val, bit_start, 12) as u16;
+    let num_entries = parse_from_bytes(val, bit_start, 12)? as u16;
     let mut entry_list: Vec<u16> = Vec::new();
     let mut count = 0u16;
 
     while count < num_entries {
-        if parse_from_bytes(val, bit_index, 1) as u8 == 1 {
+        if parse_from_bytes(val, bit_index, 1)? as u8 == 1 {
             byte_list_bit_boundary_check!(val, bit_index + 33);
 
-            let start_vendor_id = parse_from_bytes(val, bit_index + 1, 16) as u16;
-            let end_vendor_id = parse_from_bytes(val, bit_index + 17, 16) as u16;
+            let start_vendor_id = parse_from_bytes(val, bit_index + 1, 16)? as u16;
+            let end_vendor_id = parse_from_bytes(val, bit_index + 17, 16)? as u16;
 
             for vendor_id in start_vendor_id..end_vendor_id + 1 {
                 entry_list.push(vendor_id);
@@ -89,7 +95,7 @@ pub(crate) fn parse_vendor_range_from_bytes(
         } else {
             byte_list_bit_boundary_check!(val, bit_index + 17);
 
-            entry_list.push(parse_from_bytes(val, bit_index + 1, 16) as u16);
+            entry_list.push(parse_from_bytes(val, bit_index + 1, 16)? as u16);
             bit_index += 17;
         }
 

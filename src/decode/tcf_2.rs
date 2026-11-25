@@ -33,7 +33,7 @@ fn parse_publisher_restrictions_from_bytes(
 ) -> Result<RangeSection, TcsError> {
     byte_list_bit_boundary_check!(val, bit_start + 12);
 
-    let restriction_count = parse_from_bytes(val, bit_start, 12) as usize;
+    let restriction_count = parse_from_bytes(val, bit_start, 12)? as usize;
     let mut publisher_restrictions: Vec<PublisherRestriction> =
         Vec::with_capacity(restriction_count);
     let mut index: usize = 0;
@@ -42,8 +42,8 @@ fn parse_publisher_restrictions_from_bytes(
     while index < restriction_count {
         byte_list_bit_boundary_check!(val, bit_index + 8);
 
-        let purpose_id = parse_from_bytes(val, bit_index, 6) as u8;
-        let restriction_type = parse_from_bytes(val, bit_index + 6, 2) as u8;
+        let purpose_id = parse_from_bytes(val, bit_index, 6)? as u8;
+        let restriction_type = parse_from_bytes(val, bit_index + 6, 2)? as u8;
         let section = parse_vendor_range_from_bytes(val, bit_index + 8, &RangeSectionType::Vendor)?;
 
         bit_index = section.last_bit;
@@ -83,8 +83,8 @@ fn parse_range_sections_from_bytes(
 
     while start < max_bit_length && section_index < 3 {
         let section = if section_index < 2 {
-            if parse_from_bytes(val, start + 16, 1) == 0 {
-                let max_vendor_id = parse_from_bytes(val, start, 16) as usize;
+            if parse_from_bytes(val, start + 16, 1)? == 0 {
+                let max_vendor_id = parse_from_bytes(val, start, 16)? as usize;
                 let bitfield_value = parse_u16_bitfield_from_bytes(val, start + 17, max_vendor_id)?;
 
                 RangeSection {
@@ -111,9 +111,11 @@ fn parse_range_sections_from_bytes(
 }
 
 fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u16>, TcsError> {
-    let max_vendor_id = parse_from_bytes(val, bit_start, 16) as usize;
+    byte_list_bit_boundary_check!(val, bit_start + 17);
 
-    Ok(if parse_from_bytes(val, bit_start + 16, 1) == 0 {
+    let max_vendor_id = parse_from_bytes(val, bit_start, 16)? as usize;
+
+    Ok(if parse_from_bytes(val, bit_start + 16, 1)? == 0 {
         parse_u16_bitfield_from_bytes(val, bit_start + 17, max_vendor_id)?
     } else if let RangeSectionType::Vendor(vendor_set) =
         parse_vendor_range_from_bytes(val, bit_start + 17, &RangeSectionType::Vendor)?.value
@@ -125,7 +127,9 @@ fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u
 }
 
 fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<PublisherTc, TcsError> {
-    let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6) as usize;
+    byte_list_bit_boundary_check!(val, bit_start + 54);
+
+    let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6)? as usize;
 
     Ok(PublisherTc {
         publisher_purposes_consent: parse_u8_bitfield_from_bytes(val, bit_start, 24)?,
@@ -157,7 +161,7 @@ fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TcSegment, TcsError> 
     for segment in val {
         let segment_bytes = segment.as_slice();
 
-        match parse_from_bytes(segment_bytes, 0, 3) {
+        match parse_from_bytes(segment_bytes, 0, 3)? {
             1 => {
                 tc_segment.disclosed_vendors =
                     Some(parse_vendor_segment_from_bytes(segment_bytes, 3)?)
@@ -210,20 +214,20 @@ impl TcModelV2 {
         let publisher_segment = segments.publisher_tc.unwrap_or_default();
 
         Ok(Self {
-            created_at: parse_from_bytes(core_segment, 6, 36) * 100,
-            updated_at: parse_from_bytes(core_segment, 42, 36) * 100,
-            cmp_id: parse_from_bytes(core_segment, 78, 12) as u16,
-            cmp_version: parse_from_bytes(core_segment, 90, 12) as u16,
-            consent_screen: parse_from_bytes(core_segment, 102, 6) as u8,
+            created_at: parse_from_bytes(core_segment, 6, 36)? * 100,
+            updated_at: parse_from_bytes(core_segment, 42, 36)? * 100,
+            cmp_id: parse_from_bytes(core_segment, 78, 12)? as u16,
+            cmp_version: parse_from_bytes(core_segment, 90, 12)? as u16,
+            consent_screen: parse_from_bytes(core_segment, 102, 6)? as u8,
             consent_language: parse_string_from_bytes(core_segment, 108, 6, 2)?,
-            vendor_list_version: parse_from_bytes(core_segment, 120, 12) as u16,
-            tcf_policy_version: parse_from_bytes(core_segment, 132, 6) as u16,
-            is_service_specific: parse_from_bytes(core_segment, 138, 1) == 1,
-            use_non_standard_stacks: parse_from_bytes(core_segment, 139, 1) == 1,
+            vendor_list_version: parse_from_bytes(core_segment, 120, 12)? as u16,
+            tcf_policy_version: parse_from_bytes(core_segment, 132, 6)? as u16,
+            is_service_specific: parse_from_bytes(core_segment, 138, 1)? == 1,
+            use_non_standard_stacks: parse_from_bytes(core_segment, 139, 1)? == 1,
             special_feature_opt_ins: parse_u8_bitfield_from_bytes(core_segment, 140, 12)?,
             purposes_consent: parse_u8_bitfield_from_bytes(core_segment, 152, 24)?,
             purposes_li_transparency: parse_u8_bitfield_from_bytes(core_segment, 176, 24)?,
-            purpose_one_treatment: parse_from_bytes(core_segment, 200, 1) == 1,
+            purpose_one_treatment: parse_from_bytes(core_segment, 200, 1)? == 1,
             publisher_country_code: parse_string_from_bytes(core_segment, 201, 6, 2)?,
             vendors_consent: range_section_value!(core_sections, RangeSectionType::Vendor),
             vendors_li_consent: range_section_value!(
