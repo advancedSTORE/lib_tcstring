@@ -2,7 +2,7 @@
 ///
 /// [`Vendor Consent String Format V2 Core String`]: https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/81a3b9ed1545148be380b4408e6361cd2294446d/TCFv2/IAB%20Tech%20Lab%20-%20Consent%20string%20and%20vendor%20list%20formats%20v2.md#the-core-string
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(PartialEq, Eq, Clone, PartialOrd, Hash, Debug)]
+#[derive(PartialEq, Eq, Clone, PartialOrd, Hash, Debug, Default)]
 pub enum PublisherRestrictionType {
     /// Purpose Flatly Not Allowed by Publisher
     NotAllowed,
@@ -11,6 +11,7 @@ pub enum PublisherRestrictionType {
     /// Specifies that vendors need to have "Legitimate Interest"
     RequireLegitimateInterest,
     /// Should not be used
+    #[default]
     Undefined,
 }
 
@@ -192,10 +193,4 @@ pub(crate) struct PublisherTc {
     pub publisher_purposes_li_transparency: Vec<u8>,
     pub custom_purposes_consent: Vec<u8>,
     pub custom_purposes_li_transparency: Vec<u8>,
-}
-
-impl Default for PublisherRestrictionType {
-    fn default() -> Self {
-        Self::Undefined
-    }
 }
