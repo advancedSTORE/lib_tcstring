@@ -33,7 +33,7 @@ fn parse_publisher_restrictions_from_bytes(
 ) -> Result<RangeSection, TcsError> {
     byte_list_bit_boundary_check!(val, bit_start + 12);
 
-    let restriction_count = parse_from_bytes(val, bit_start, 12) as usize;
+    let restriction_count = parse_from_bytes(val, bit_start, 12)? as usize;
     let mut publisher_restrictions: Vec<PublisherRestriction> =
         Vec::with_capacity(restriction_count);
     let mut index: usize = 0;
@@ -42,8 +42,8 @@ fn parse_publisher_restrictions_from_bytes(
     while index < restriction_count {
         byte_list_bit_boundary_check!(val, bit_index + 8);
 
-        let purpose_id = parse_from_bytes(val, bit_index, 6) as u8;
-        let restriction_type = parse_from_bytes(val, bit_index + 6, 2) as u8;
+        let purpose_id = parse_from_bytes(val, bit_index, 6)? as u8;
+        let restriction_type = parse_from_bytes(val, bit_index + 6, 2)? as u8;
         let section = parse_vendor_range_from_bytes(val, bit_index + 8, &RangeSectionType::Vendor)?;
 
         bit_index = section.last_bit;
@@ -83,8 +83,8 @@ fn parse_range_sections_from_bytes(
 
     while start < max_bit_length && section_index < 3 {
         let section = if section_index < 2 {
-            if parse_from_bytes(val, start + 16, 1) == 0 {
-                let max_vendor_id = parse_from_bytes(val, start, 16) as usize;
+            if parse_from_bytes(val, start + 16, 1)? == 0 {
+                let max_vendor_id = parse_from_bytes(val, start, 16)? as usize;
                 let bitfield_value = parse_u16_bitfield_from_bytes(val, start + 17, max_vendor_id)?;
 
                 RangeSection {
@@ -111,9 +111,11 @@ fn parse_range_sections_from_bytes(
 }
 
 fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u16>, TcsError> {
-    let max_vendor_id = parse_from_bytes(val, bit_start, 16) as usize;
+    byte_list_bit_boundary_check!(val, bit_start + 17);
 
-    Ok(if parse_from_bytes(val, bit_start + 16, 1) == 0 {
+    let max_vendor_id = parse_from_bytes(val, bit_start, 16)? as usize;
+
+    Ok(if parse_from_bytes(val, bit_start + 16, 1)? == 0 {
         parse_u16_bitfield_from_bytes(val, bit_start + 17, max_vendor_id)?
     } else if let RangeSectionType::Vendor(vendor_set) =
         parse_vendor_range_from_bytes(val, bit_start + 17, &RangeSectionType::Vendor)?.value
@@ -125,7 +127,9 @@ fn parse_vendor_segment_from_bytes(val: &[u8], bit_start: usize) -> Result<Vec<u
 }
 
 fn parse_publisher_tc_from_bytes(val: &[u8], bit_start: usize) -> Result<PublisherTc, TcsError> {
-    let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6) as usize;
+    byte_list_bit_boundary_check!(val, bit_start + 54);
+
+    let custom_purposes_count = parse_from_bytes(val, bit_start + 48, 6)? as usize;
 
     Ok(PublisherTc {
         publisher_purposes_consent: parse_u8_bitfield_from_bytes(val, bit_start, 24)?,
@@ -157,7 +161,7 @@ fn parse_tc_segments_from_slice(val: &[Vec<u8>]) -> Result<TcSegment, TcsError> 
     for segment in val {
         let segment_bytes = segment.as_slice();
 
-        match parse_from_bytes(segment_bytes, 0, 3) {
+        match parse_from_bytes(segment_bytes, 0, 3)? {
             1 => {
                 tc_segment.disclosed_vendors =
                     Some(parse_vendor_segment_from_bytes(segment_bytes, 3)?)
@@ -210,20 +214,20 @@ impl TcModelV2 {
         let publisher_segment = segments.publisher_tc.unwrap_or_default();
 
         Ok(Self {
-            created_at: parse_from_bytes(core_segment, 6, 36) * 100,
-            updated_at: parse_from_bytes(core_segment, 42, 36) * 100,
-            cmp_id: parse_from_bytes(core_segment, 78, 12) as u16,
-            cmp_version: parse_from_bytes(core_segment, 90, 12) as u16,
-            consent_screen: parse_from_bytes(core_segment, 102, 6) as u8,
+            created_at: parse_from_bytes(core_segment, 6, 36)? * 100,
+            updated_at: parse_from_bytes(core_segment, 42, 36)? * 100,
+            cmp_id: parse_from_bytes(core_segment, 78, 12)? as u16,
+            cmp_version: parse_from_bytes(core_segment, 90, 12)? as u16,
+            consent_screen: parse_from_bytes(core_segment, 102, 6)? as u8,
             consent_language: parse_string_from_bytes(core_segment, 108, 6, 2)?,
-            vendor_list_version: parse_from_bytes(core_segment, 120, 12) as u16,
-            tcf_policy_version: parse_from_bytes(core_segment, 132, 6) as u16,
-            is_service_specific: parse_from_bytes(core_segment, 138, 1) == 1,
-            use_non_standard_stacks: parse_from_bytes(core_segment, 139, 1) == 1,
+            vendor_list_version: parse_from_bytes(core_segment, 120, 12)? as u16,
+            tcf_policy_version: parse_from_bytes(core_segment, 132, 6)? as u16,
+            is_service_specific: parse_from_bytes(core_segment, 138, 1)? == 1,
+            use_non_standard_stacks: parse_from_bytes(core_segment, 139, 1)? == 1,
             special_feature_opt_ins: parse_u8_bitfield_from_bytes(core_segment, 140, 12)?,
             purposes_consent: parse_u8_bitfield_from_bytes(core_segment, 152, 24)?,
             purposes_li_transparency: parse_u8_bitfield_from_bytes(core_segment, 176, 24)?,
-            purpose_one_treatment: parse_from_bytes(core_segment, 200, 1) == 1,
+            purpose_one_treatment: parse_from_bytes(core_segment, 200, 1)? == 1,
             publisher_country_code: parse_string_from_bytes(core_segment, 201, 6, 2)?,
             vendors_consent: range_section_value!(core_sections, RangeSectionType::Vendor),
             vendors_li_consent: range_section_value!(
@@ -696,5 +700,135 @@ mod tests {
                 custom_purposes_li_transparency: vec![],
             })
         );
+    }
+
+    /// Valid core string reused as the base for segment reproducers.
+    const VALID_CORE: &str = "COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA";
+
+    /// Every valid TC string exercised by the tests above.
+    const VALID_TC_STRINGS: &[&str] = &[
+        "COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA",
+        "COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.YAAAAAAAAAAAAAAAAAA",
+        "COw4XqLOw4XqLAAAAAENAXCAAAAAAAAAAAAAAAAAAAAA.YAAAAAAAAAAAAAAAAAA.QFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA.IFukWSQgAIQwgI0QEByFAAAAeIAACAIgSAAQAIAgEQACEABAAAgAQFAEAIAAAGBAAgAAAAQAIFAAMCQAAgAAQiRAEQAAAAANAAIAAggAIYQFAAARmggBC3ZCYzU2yIA",
+        "CGL23UdMFJzvuA9ACCENAXCEAC0AAGrAAA5YA5ht7-_d_7_vd-f-nrf4_4A4hM4JCKoK4YhmAqABgAEgAA",
+        "COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAEEUACCKAAA.IFoEUQQgAIQwgIwQABAEAAAAOIAACAIAAAAQAIAgEAACEAAAAAgAQBAAAAAAAGBAAgAAAAAAAFAAECAAAgAAQARAEQAAAAAJAAIAAgAAAYQEAAAQmAgBC3ZAYzUw",
+        "COw4XqLOw4XqLAAAAAENAXCAAP-gAAAfwIAAACngAI8AAA.cAEAPAAAC7gAHw4AAA",
+        "COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AEFABgACAA4A.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA",
+        "CO51ctPO51ctPCnABBDEA3CsAP_AAAAAAAYgGkNf_X_fb2vj-_5999t0eY1f9_63v-wzjgeNs-8Nyd_X_L4Xr2MyvB36pq4KuR4Eu3LBAQdlHOHcTQmQwIkVqTLsbk2Mq7NKJ7LEilMbM2dYGH9vn9XTuZCY70_sf__z_3-_-___67f-L2wAAADhIBQAFQAQAA0ACYAE8ARwAtwB-gIvAXmKgBgBMAEcAvMZADACYAI4BeY6AaABUAEAANAAmABPAEcAJgAW4A_QCLAIvAXmAxglAFACYAI4AW4CLwF5lIBYAFQAQAA0ACYAE8AW4A_QCLAIvAXmAxghACACYAI4.f_gAAAAAAWAA",
+        "COw4XqLOw4XqLAAAAAENAXCf-v-gAAAfwIAAACngAI8AIFABgACAA4SADAAgADQ.IAPPwAPrwA.QAPPwAPrwA.cAEAPAAAC7gAHw4AAA",
+        "CO4yYChO4yYChCnABBDEA0CsAP_AAAAAAAYgF-wDwAUAB6AEaAK4AaYA5AC6gH_ARqAkEBQ4CuwFvgLsAX6AAAAYJABAXmKgAgLzGQAQF5joAIC8yUAEBeZSACAvMAAA.f_gAAAAAAQAA",
+        "CO-Z5geO-Z5geAfbgBDEBECoAP_AAH_AAAigGfwFgADAAZABOACoAFgAMgAiAB-AERAIwAjQBMAEWAJwAXMAzgCCgEtALaAXmAxEBmgDPwM_gLAAGAAyACcAFQALAAZABEAD8AIiARgBGgCYAIsATgAuYBnAEFAJaAW0AvMBiIDNAGfgAA",
+    ];
+
+    /// Reproducer 1: Disclosed Vendors segment with only the 3-bit SegmentType
+    /// (MaxVendorId / IsRangeEncoding missing).
+    #[test]
+    fn truncated_disclosed_vendors_segment_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.IA", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Same as reproducer 1, but for the Allowed Vendors segment (type 2).
+    #[test]
+    fn truncated_allowed_vendors_segment_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.QA", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 2: Publisher TC segment with only the 3-bit SegmentType
+    /// (NumCustomPurposes missing).
+    #[test]
+    fn truncated_publisher_tc_segment_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.cA", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 3: core string cut right after the vendor-consent section,
+    /// leaving fewer bits than the vendor-LI section header needs.
+    #[test]
+    fn core_cut_after_vendor_consent_section_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from("COvFyGBOvFyGBAbAAAENAPCAAOAAAAAAAAAAAAA"),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 4: range-encoded Disclosed Vendors segment declaring
+    /// NumEntries = 1 that ends exactly where the IsARange bit would be read.
+    /// Bits: SegmentType=1, MaxVendorId=5, IsRangeEncoding=1, NumEntries=1.
+    #[test]
+    fn missing_is_a_range_bit_returns_err() {
+        assert_eq!(
+            TcModelV2::try_from(format!("{}.IACwAQ", VALID_CORE).as_str()),
+            Err(TcsError::InsufficientLength)
+        );
+    }
+
+    /// Reproducer 5: vendor-consent range entry 65535..=65535 must decode to
+    /// [65535] (debug: no overflow panic, release: vendor not dropped).
+    #[test]
+    fn range_entry_ending_at_u16_max_includes_65535() {
+        let model = TcModelV2::try_from("CAAAAABAAAAABABABAENABEAAAAAAAAAAAAH__wAf____-AAAAA")
+            .expect("range ending at 65535 must decode");
+
+        assert_eq!(model.vendors_consent, vec![65535]);
+        assert!(model.vendors_li_consent.is_empty());
+        assert!(model.publisher_restrictions.is_empty());
+    }
+
+    /// Every character prefix of every valid TC string must decode without panicking.
+    #[test]
+    fn every_string_prefix_never_panics() {
+        for tc_string in VALID_TC_STRINGS {
+            for end in 0..=tc_string.len() {
+                let prefix = &tc_string[..end];
+                let result = std::panic::catch_unwind(|| TcModelV2::try_from(prefix));
+
+                assert!(
+                    result.is_ok(),
+                    "panicked on prefix of length {}: {:?}",
+                    end,
+                    prefix
+                );
+            }
+        }
+    }
+
+    /// Every byte-level truncation of every decoded segment must decode without
+    /// panicking. Base64 prefixes move in 6-bit steps and many are rejected as
+    /// invalid base64, so this reaches boundaries the string prefix test cannot.
+    #[test]
+    fn every_byte_truncation_never_panics() {
+        for tc_string in VALID_TC_STRINGS {
+            let segments: Vec<Vec<u8>> = tc_string
+                .split('.')
+                .map(|s| BASE64_ENGINE.decode(s).expect("valid test string"))
+                .collect();
+
+            for segment_index in 0..segments.len() {
+                for len in 0..segments[segment_index].len() {
+                    let mut truncated = segments.clone();
+
+                    truncated[segment_index].truncate(len);
+
+                    let result =
+                        std::panic::catch_unwind(move || TcModelV2::try_from_vec(truncated));
+
+                    assert!(
+                        result.is_ok(),
+                        "panicked on {:?}: segment {} truncated to {} bytes",
+                        tc_string,
+                        segment_index,
+                        len
+                    );
+                }
+            }
+        }
     }
 }

@@ -49,7 +49,7 @@ macro_rules! parse_bitfield_from_bytes {
             let mut result: Vec<$type> = Vec::with_capacity(bit_length);
 
             for bit_index in bit_start..bit_end {
-                if parse_from_bytes(val, bit_index, 1) == 1 {
+                if parse_from_bytes(val, bit_index, 1)? == 1 {
                     result.push(((bit_index - bit_start) + 1) as $type);
                 }
             }
